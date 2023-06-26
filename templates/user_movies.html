@@ -14,7 +14,7 @@
             <form method="POST" action="/users/{{ user_id }}/delete_movie/{{ movie.id }}">
                 <input type="submit" value="Delete">
             </form>
-            <a href="{{ url_for('update_movie', user_id=user_id, movie_id=movie['id']) }}">Update</a>
+            <a href="/add_movie">Click to add a Movie</a>
             <br><br>
         {% endfor %}
     </ul>

@@ -1,4 +1,5 @@
-from flask import Flask, render_template
+import requests
+from flask import Flask, render_template, request, redirect, url_for
 from database_managers.json_data_manager_interface import JSONDataManager
 
 app = Flask(__name__)
@@ -14,10 +15,21 @@ data_manager = JSONDataManager('./storage_files/json_database.json')
 # @app.route('/users/int<user_id>/update_movie/int:<movie_id>')
 #
 #
-# @app.route('/users/int:<user_id>/add_movie')
-#
-#
-# @app.route('/add_user')
+@app.route('/users/int:<user_id>/add_movie')
+def add_movie():
+    pass
+
+
+@app.route('/add_user', methods=['GET', 'POST'])
+def add_user():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        users = data_manager.get_all_users()
+        user_id = max(users, key=lambda x: x['id'])
+        user_id = user_id['id'] + 1
+        data_manager.add_user(name, user_id)
+        return redirect(url_for("list_users"))
+    return render_template('add_user.html')
 
 
 @app.route('/users/<int:user_id>', methods=['GET'])
