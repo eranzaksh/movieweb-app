@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Movie</title>
+</head>
+<body>
+  <h1>Update Blog Post</h1>
+    <form action="{{ url_for('update', user_id=user['id'], movie_id=movie['id']) }}" method="POST">
+        <label for="content">Content:</label><br>
+        <textarea id="content" name="content" rows="5" cols="50" >{{ post['content'] }}</textarea><br>
+        <br><br>
+        <input type="submit" value="Update">
+    </form>
+</body>
+</html>

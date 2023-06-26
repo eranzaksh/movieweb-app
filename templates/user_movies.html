@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My movies List</title>
+</head>
+<body>
+    <ul>
+        {% for movie in user %}
+            <li>Movie Name: {{ movie['name'] }}</li>
+            <li>Director: {{ movie['director'] }}</li>
+            <li>Release Date:  {{ movie['year'] }}</li>
+            <li>Movie Rating:  {{ movie['rating'] }}</li>
+            <form method="POST" action="/users/{{ user_id }}/delete_movie/{{ movie.id }}">
+                <input type="submit" value="Delete">
+            </form>
+            <a href="{{ url_for('update_movie', user_id=user_id, movie_id=movie['id']) }}">Update</a>
+            <br><br>
+        {% endfor %}
+    </ul>
+</body>
+</html>
