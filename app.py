@@ -5,24 +5,25 @@ app = Flask(__name__)
 data_manager = JSONDataManager('./storage_files/json_database.json')
 
 
-@app.route('/users/int:<user_id>/delete_movie/int:<movie_id>')
+# @app.route('/users/int:<user_id>/delete_movie/int:<movie_id>')
+#
+#
+# @app.route('/users/int:<user_id>/edit_movie/int:<movie_id>')
+#
+#
+# @app.route('/users/int<user_id>/update_movie/int:<movie_id>')
+#
+#
+# @app.route('/users/int:<user_id>/add_movie')
+#
+#
+# @app.route('/add_user')
 
 
-@app.route('/users/int:<user_id>/edit_movie/int:<movie_id>')
-
-
-@app.route('/users/int<user_id>/update_movie/int:<movie_id>')
-
-
-@app.route('/users/int:<user_id>/add_movie')
-
-
-@app.route('/add_user')
-
-
-@app.route('/users/int:<user_id>')
+@app.route('/users/<int:user_id>', methods=['GET'])
 def user_movies(user_id):
-    pass
+    user = data_manager.get_user_movies(user_id)
+    return render_template('/user_movies.html', user=user, user_id=user_id)
 
 
 @app.route('/users')
