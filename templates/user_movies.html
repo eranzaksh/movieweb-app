@@ -14,9 +14,15 @@
             <form method="POST" action="/users/{{ user_id }}/delete_movie/{{ movie.id }}">
                 <input type="submit" value="Delete">
             </form>
-            <a href="/add_movie">Click to add a Movie</a>
             <br><br>
         {% endfor %}
     </ul>
+    <hr>
+    <h2>Add new Movie</h2>
+    <form method="POST" action="/users/{{ user_id }}/add_movie">
+        <label for="name">Movie Name:</label>
+        <input type="text" id="name" name="name" required>
+        <input type="submit" value="Add movie">
+    </form>
 </body>
 </html>

@@ -9,12 +9,33 @@ API_KEY = "711e7593"
 URL = f"http://www.omdbapi.com/?apikey={API_KEY}&t="
 
 
+class MovieAlreadyExists(Exception):
+    pass
+
+
+class NotFoundException(Exception):
+    pass
+
+
 class JSONDataManager(DataManagerInterface):
     def __init__(self, filename):
         self.filename = filename
 
-    def save_json_file(self, file):
-        json_data = json.dumps(file)
+    def fetch_movie_by_id(self, user_id, movie_id):
+        user_movies = self.get_user_movies(user_id)
+        for movie in user_movies:
+            if movie['id'] == movie_id:
+                return movie
+
+    @staticmethod
+    def fetch_user_by_id(user_id, users):
+        users = users
+        for user in users:
+            if user['id'] == user_id:
+                return user
+
+    def save_json_file(self, data):
+        json_data = json.dumps(data)
         with open(self.filename, 'w') as handle:
             handle.write(json_data)
         return json_data
@@ -26,6 +47,13 @@ class JSONDataManager(DataManagerInterface):
             json_database = json.load(handle)
         return json_database
 
+    def delete_movie(self, user_id, movie_id):
+        all_users = self.get_all_users()
+        current_user_movie = self.fetch_movie_by_id(user_id, movie_id)
+        user = self.fetch_user_by_id(user_id, all_users)
+        user['movies'].remove(current_user_movie)
+        self.save_json_file(all_users)
+
     def add_movie(self, user_id, name, director, rating, year, poster, imdb_page):
         movies_list = self.get_user_movies(user_id)
         users = self.get_all_users()
@@ -34,13 +62,17 @@ class JSONDataManager(DataManagerInterface):
         try:
             res = requests.get(URL + name)
             movie_data = res.json()
+            for movie in movies_list:
+                if name.lower() in movie["name"].lower():
+                    raise MovieAlreadyExists
             if 'Error' in movie_data:
-                raise Exception(self.pr_red("Movie not found!"))
+                raise NotFoundException("Movie not found!")
             movie_id = len(movies_list)
             for movie in movies_list:
                 if movie_id == movie['id']:
                     movie_id += 1
-            new_movie = {"id": movie_id, "name": movie_data["Title"], 'rating': float(movie_data[rating]), 'year': movie_data[year],
+            new_movie = {"id": movie_id, "name": movie_data["Title"], 'rating': float(movie_data[rating]),
+                         'year': movie_data[year],
                          'poster': movie_data[poster], 'page': movie_data[imdb_page], 'director': movie_data[director]}
             for user in users:
                 if user['id'] == user_id:
@@ -48,7 +80,7 @@ class JSONDataManager(DataManagerInterface):
             self.save_json_file(users)
             return
         except requests.exceptions.RequestException:
-            self.pr_red("There is no internet connection!")
+            print("There is no internet connection!")
 
     def add_user(self, name, user_id):
         users = self.get_all_users()

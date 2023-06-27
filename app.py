@@ -1,23 +1,33 @@
 import requests
-from flask import Flask, render_template, request, redirect, url_for
-from database_managers.json_data_manager_interface import JSONDataManager
+from flask import Flask, render_template, request, redirect, url_for, flash
+from database_managers.json_data_manager_interface import JSONDataManager, MovieAlreadyExists, NotFoundException
 
 app = Flask(__name__)
 data_manager = JSONDataManager('./storage_files/json_database.json')
 
 
-# @app.route('/users/int:<user_id>/delete_movie/int:<movie_id>')
-#
-#
 # @app.route('/users/int:<user_id>/edit_movie/int:<movie_id>')
 #
 #
 # @app.route('/users/int<user_id>/update_movie/int:<movie_id>')
 #
 #
-@app.route('/users/int:<user_id>/add_movie')
-def add_movie():
-    pass
+@app.route('/users/<int:user_id>/delete_movie/<int:movie_id>', methods=["POST"])
+def delete_movie(user_id, movie_id):
+    data_manager.delete_movie(user_id, movie_id)
+    return redirect(url_for("user_movies", user_id=user_id))
+
+
+@app.route('/users/<int:user_id>/add_movie', methods=["POST"])
+def add_movie(user_id):
+    movie_name = request.form.get("name")
+    try:
+        data_manager.add_movie(user_id, movie_name, "Director", "imdbRating", "Year", "Poster", "imdbRating")
+        return redirect(url_for("user_movies", user_id=user_id))
+    except MovieAlreadyExists:
+        return redirect(url_for("user_movies", user_id=user_id))
+    except NotFoundException:
+        return redirect(url_for("user_movies", user_id=user_id))
 
 
 @app.route('/add_user', methods=['GET', 'POST'])
@@ -46,7 +56,7 @@ def list_users():
 
 @app.route('/')
 def home():
-    return "Welcome to Movieweb app!"
+    return render_template("/index.html")
 
 
 if __name__ == "__main__":
