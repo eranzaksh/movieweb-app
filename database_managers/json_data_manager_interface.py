@@ -17,6 +17,10 @@ class NotFoundException(Exception):
     pass
 
 
+class UserIdAlreadyExists(Exception):
+    pass
+
+
 class JSONDataManager(DataManagerInterface):
     def __init__(self, filename):
         self.filename = filename
@@ -41,11 +45,14 @@ class JSONDataManager(DataManagerInterface):
         return json_data
 
     def list_movies(self):
-        with open(self.filename, 'r') as handle:
-            if os.path.getsize(self.filename) == 0:
-                return
-            json_database = json.load(handle)
-        return json_database
+        if os.path.exists(self.filename):
+            with open(self.filename, 'r') as handle:
+                if os.path.getsize(self.filename) == 0:
+                    return
+                json_database = json.load(handle)
+            return json_database
+        else:
+            raise NotFoundException(f"File {self.filename} doesn't exist")
 
     def delete_movie(self, user_id, movie_id):
         all_users = self.get_all_users()
@@ -84,13 +91,21 @@ class JSONDataManager(DataManagerInterface):
 
     def add_user(self, name, user_id):
         users = self.get_all_users()
+        users_ids = [user['id'] for user in users]
         new_user = {"id": user_id, "name": name, "movies": []}
+        if users is None:
+            users = []
+        if new_user['id'] in users_ids:
+            raise UserIdAlreadyExists
         users.append(new_user)
         self.save_json_file(users)
 
     def get_all_users(self):
-        all_users = self.list_movies()
-        return all_users
+        try:
+            all_users = self.list_movies()
+            return all_users
+        except NotFoundException as e:
+            return e
 
     def get_user_movies(self, user_id):
         # return a list of all movies for given user

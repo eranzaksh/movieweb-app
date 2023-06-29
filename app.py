@@ -1,6 +1,7 @@
 import requests
 from flask import Flask, render_template, request, redirect, url_for, flash
-from database_managers.json_data_manager_interface import JSONDataManager, MovieAlreadyExists, NotFoundException
+from database_managers.json_data_manager_interface import JSONDataManager, MovieAlreadyExists, NotFoundException, \
+    UserIdAlreadyExists
 
 app = Flask(__name__)
 data_manager = JSONDataManager('./storage_files/json_database.json')
@@ -32,14 +33,17 @@ def add_movie(user_id):
 
 @app.route('/add_user', methods=['GET', 'POST'])
 def add_user():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        users = data_manager.get_all_users()
-        user_id = max(users, key=lambda x: x['id'])
-        user_id = user_id['id'] + 1
-        data_manager.add_user(name, user_id)
-        return redirect(url_for("list_users"))
-    return render_template('add_user.html')
+    try:
+        if request.method == 'POST':
+            name = request.form.get('name')
+            users = data_manager.get_all_users()
+            user_id = max(users, key=lambda x: x['id'])
+            user_id = user_id['id'] + 1
+            data_manager.add_user(name, user_id)
+            return redirect(url_for("list_users"))
+        return render_template('add_user.html')
+    except UserIdAlreadyExists:
+        return "User Already Exists"
 
 
 @app.route('/users/<int:user_id>', methods=['GET'])
@@ -50,8 +54,11 @@ def user_movies(user_id):
 
 @app.route('/users')
 def list_users():
-    users = data_manager.get_all_users()
-    return render_template('/users.html', users=users)
+    try:
+        users = data_manager.get_all_users()
+        return render_template('/users.html', users=users)
+    except NotFoundException:
+        return "File does not exists!"
 
 
 @app.route('/')
