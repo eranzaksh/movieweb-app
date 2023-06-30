@@ -1,28 +1,100 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>My movies List</title>
-</head>
-<body>
-    <ul>
-        {% for movie in user %}
-            <li>Movie Name: {{ movie['name'] }}</li>
-            <li>Director: {{ movie['director'] }}</li>
-            <li>Release Date:  {{ movie['year'] }}</li>
-            <li>Movie Rating:  {{ movie['rating'] }}</li>
-            <form method="POST" action="/users/{{ user_id }}/delete_movie/{{ movie.id }}">
-                <input type="submit" value="Delete">
-            </form>
-            <br><br>
-        {% endfor %}
-    </ul>
-    <hr>
-    <h2>Add new Movie</h2>
-    <form method="POST" action="/users/{{ user_id }}/add_movie">
-        <label for="name">Movie Name:</label>
-        <input type="text" id="name" name="name" required>
-        <input type="submit" value="Add movie">
-    </form>
-</body>
+
+<!DOCTYPE HTML>
+<!--
+	Phantom by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>My Movie Web-App</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/main.css') }}" />
+		<noscript><link rel="stylesheet" href="{{ url_for('static', filename='assets/css/noscript.css') }}" /></noscript>
+	</head>
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+
+							<!-- Logo -->
+								<a href="/" class="logo">
+									<span class="symbol"><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Logo"></span><span class="title">Movies</span>
+								</a>
+
+							<!-- Nav -->
+								<nav>
+									<ul>
+										<li><a href="#menu">Menu</a></li>
+									</ul>
+								</nav>
+
+						</div>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<h2>Menu</h2>
+						<ul>
+							<li><a href="/">Home</a></li>
+							<li><a href="/users">All users</a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<header>
+								<h1>{{ user_name['name'] }}'s Movie list</h1>
+							</header>
+							<section class="tiles">
+                                {% for movie in user %}
+								<article class="style{{ loop.index }}">
+									<span class="image">
+										<img src="{{ movie['poster'] }}" alt="Movie Poster">
+									</span>
+									<a href="https://www.imdb.com/title/{{ movie['page'] }}" style="width: 400px;
+									height: 650px">
+									</a>
+									<ul>
+										<li><h3>{{ movie['name'] }}</h3></li>
+										<li><em>Director: {{ movie['director'] }}</em></li>
+										<li>Movie Rating:  {{ movie['rating'] }}</li>
+										<li>Release Date:  {{ movie['year'] }}</li>
+									</ul>
+									<li>
+										<form method="POST" action="/users/{{ user_id }}/delete_movie/{{ movie.id }}">
+											<input type="submit" value="Delete">
+										</form>
+                                	</li>
+								</article>
+                                {% endfor %}
+								<article class="style2">
+                                    <div class="content">
+                                            <hr>
+                                        <h2>Add new Movie</h2>
+                                        <form method="POST" action="/users/{{ user_id }}/add_movie">
+                                            <label for="name">Movie Name:</label>
+                                            <input type="text" id="name" name="name" required>
+                                            <input type="submit" value="Add movie">
+                                        </form>
+                                    </div>
+								</article>
+							</section>
+						</div>
+					</div
+			</div>
+
+		<!-- Scripts -->
+			<script src="{{ url_for('static', filename='assets/js/jquery.min.js') }}"></script>
+			<script src="{{ url_for('static', filename='assets/js/browser.min.js') }}"></script>
+			<script src="{{ url_for('static', filename='assets/js/breakpoints.min.js') }}"></script>
+			<script src="{{ url_for('static', filename='assets/js/util.js') }}"></script>
+			<script src="{{ url_for('static', filename='assets/js/main.js') }}"></script>
+
+	</body>
 </html>

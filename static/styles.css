@@ -1,0 +1,41 @@
+ul {
+    list-style: none; /* Remove bullets */
+    padding: 0;
+}
+
+li {
+    list-style: none;
+}
+
+li.movie {
+    display: inline-block;
+    width: 200px;
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+li.movie img {
+    width: 100%;
+    height: auto;
+}
+.movies-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.movie {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.movie img {
+  width: 200px;
+  height: auto;
+  display: block;
+  margin-top: 10px;
+}

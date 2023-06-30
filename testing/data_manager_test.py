@@ -49,11 +49,11 @@ def test_json_delete():
 
 def test_add_user():
     data_manager = JSONDataManager("testing/testing_users.json")
-    data_manager.add_user("david", 2)
+    data_manager.add_user("david", 8)
     users = data_manager.get_all_users()
     assert len(users) == 2
     assert users[1]['name'] == 'david'
-    assert users[1]['id'] == 2
+    assert users[1]['id'] == 8
 
 
 def test_add_user_exception():
