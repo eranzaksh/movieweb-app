@@ -4,17 +4,10 @@ import os
 import requests
 
 from .data_manager_interface import DataManagerInterface
+from .add_movies_methods import AddMovieMethods, NotFoundException
 
 API_KEY = "711e7593"
 URL = f"http://www.omdbapi.com/?apikey={API_KEY}&t="
-
-
-class MovieAlreadyExists(Exception):
-    pass
-
-
-class NotFoundException(Exception):
-    pass
 
 
 class UserIdAlreadyExists(Exception):
@@ -69,21 +62,9 @@ class JSONDataManager(DataManagerInterface):
         try:
             res = requests.get(URL + name)
             movie_data = res.json()
-            for movie in movies_list:
-                if name.lower() in movie["name"].lower():
-                    raise MovieAlreadyExists
-            if 'Error' in movie_data:
-                raise NotFoundException("Movie not found!")
-            movie_id = len(movies_list)
-            for movie in movies_list:
-                if movie_id == movie['id']:
-                    movie_id += 1
-            new_movie = {"id": movie_id, "name": movie_data["Title"], 'rating': float(movie_data[rating]),
-                         'year': movie_data[year],
-                         'poster': movie_data[poster], 'page': movie_data[imdb_page], 'director': movie_data[director]}
-            for user in users:
-                if user['id'] == user_id:
-                    user['movies'].append(new_movie)
+            new_movie = AddMovieMethods.generating_new_movie(name, movies_list, movie_data,
+                                                             rating, year, poster, imdb_page, director)
+            AddMovieMethods.add_movie_to_user(users, user_id, new_movie)
             self.save_json_file(users)
             return
         except requests.exceptions.RequestException:

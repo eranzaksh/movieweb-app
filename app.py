@@ -1,7 +1,7 @@
 import requests
 from flask import Flask, render_template, request, redirect, url_for, flash
-from database_managers.json_data_manager_interface import JSONDataManager, MovieAlreadyExists, NotFoundException, \
-    UserIdAlreadyExists
+from database_managers.json_data_manager_interface import JSONDataManager, UserIdAlreadyExists
+from database_managers.add_movies_methods import MovieAlreadyExists, NotFoundException
 
 app = Flask(__name__)
 data_manager = JSONDataManager('./storage_files/json_database.json')
@@ -15,7 +15,7 @@ data_manager = JSONDataManager('./storage_files/json_database.json')
 #
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html'), 404
+    return render_template('404.html', e=e), 404
 
 
 @app.route('/users/<int:user_id>/delete_movie/<int:movie_id>', methods=["POST"])
@@ -73,4 +73,4 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
