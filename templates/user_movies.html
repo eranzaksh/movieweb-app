@@ -66,11 +66,12 @@
 										<li>Movie Rating:  {{ movie['rating'] }}</li>
 										<li>Release Date:  {{ movie['year'] }}</li>
 									</ul>
-									<li>
+									<li class="delete-update">
 										<form method="POST" action="/users/{{ user_id }}/delete_movie/{{ movie.id }}">
 											<input type="submit" value="Delete">
 										</form>
-                                	</li>
+										<a href="{{ url_for('update_movie', user_id=user_id, movie_id=movie.id) }}" class="update-button">Update</a>
+									</li>
 								</article>
                                 {% endfor %}
 								<article class="style2">

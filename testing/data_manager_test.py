@@ -1,5 +1,6 @@
 import pytest
-from database_managers.json_data_manager_interface import JSONDataManager, NotFoundException, UserIdAlreadyExists
+from ..database_managers.json_data_manager_interface import JSONDataManager, UserIdAlreadyExists
+from ..database_managers.add_movies_methods import NotFoundException
 import random
 
 movie_names = [
@@ -62,3 +63,4 @@ def test_add_user_exception():
     user_name = data_manager.get_all_users()[0]['name']
     with pytest.raises(UserIdAlreadyExists):
         data_manager.add_user(user_name, user_id)
+

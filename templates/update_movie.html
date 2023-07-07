@@ -49,24 +49,38 @@
 					<div id="main">
 						<div class="inner">
 							<header>
-								<h1>Add User</h1>
+								<h1>Updating movie</h1>
 							</header>
 							<section class="tiles">
 								<article class="style1">
-                                    <form action="/add_user" method="POST">
-                                        <label for="name">Name:</label>
-                                        <input type="text" id="name" name="name" required>
-										<label for="password">Password:</label>
-										<input type="password" id="password" name="password" required>
-                                        <br>
-										<label for="confirm-password">Confirm Password:</label>
-										<input type="password" id="confirm-password" name="confirm-password" required>
-                                        <input type="submit" value="Add User">
+									<span class="image">
+										<img src="{{ movie['poster'] }}" alt="Movie Poster">
+									</span>
+									<a href="https://www.imdb.com/title/{{ movie['page'] }}" style="width: 400px;
+									height: 650px">
+									</a>
+                                    <form method="POST" action="/users/{{ user_id }}/update_movie/{{ movie.id }}">
+                                        <ul>
+                                            <li>
+                                                <label for="director">Director:</label>
+                                                <input type="text" id="director" name="director" value="{{ movie['director'] }}">
+                                            </li>
+                                            <li>
+                                                <label for="rating">Movie Rating:</label>
+                                                <input type="text" id="rating" name="rating" value="{{ movie['rating'] }}">
+                                            </li>
+                                            <li>
+                                                <label for="year">Release Date:</label>
+                                                <input type="text" id="year" name="year" value="{{ movie['year'] }}">
+                                            </li>
+                                        </ul>
+                                        <input type="submit" value="Update">
                                     </form>
 								</article>
 							</section>
 						</div>
 					</div>
+			</div>
 
 		<!-- Scripts -->
 			<script src="{{ url_for('static', filename='assets/js/jquery.min.js') }}"></script>

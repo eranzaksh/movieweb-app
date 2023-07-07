@@ -1,8 +1,7 @@
 import json
 import os
-
 import requests
-
+from flask_bcrypt import Bcrypt
 from .data_manager_interface import DataManagerInterface
 from .add_movies_methods import AddMovieMethods, NotFoundException
 
@@ -47,6 +46,15 @@ class JSONDataManager(DataManagerInterface):
         else:
             raise NotFoundException(f"File {self.filename} doesn't exist")
 
+    def update_movie(self, user_id, movie_id, director, date, rating):
+        all_users = self.get_all_users()
+        current_user = self.fetch_user_by_id(user_id, all_users)
+        updated_movie = {"director": director, "year": date, "rating": rating}
+        for movie in current_user['movies']:
+            if movie['id'] == movie_id:
+                movie.update(updated_movie)
+        self.save_json_file(all_users)
+
     def delete_movie(self, user_id, movie_id):
         all_users = self.get_all_users()
         current_user_movie = self.fetch_movie_by_id(user_id, movie_id)
@@ -70,13 +78,22 @@ class JSONDataManager(DataManagerInterface):
         except requests.exceptions.RequestException:
             print("There is no internet connection!")
 
-    def add_user(self, name, user_id):
+    def create_user_password(self, password, confirm_password):
+        bcrypt = Bcrypt()
+        if password != confirm_password:
+            raise Exception("passwords don't match!")
+        password = bcrypt.generate_password_hash(password).decode('utf-8')
+        pass
+
+    def add_user(self, name, user_id, password, confirm_password):
         users = self.get_all_users()
         users_ids = [user['id'] for user in users]
-        new_user = {"id": user_id, "name": name, "movies": []}
+        user_names = [user['name'] for user in users]
+        hashed_pass = self.create_user_password(password, confirm_password)
+        new_user = {"id": user_id, "name": name, "password": hashed_pass, "movies": []}
         if users is None:
             users = []
-        if new_user['id'] in users_ids:
+        if new_user['id'] in users_ids or new_user['name'] in user_names:
             raise UserIdAlreadyExists
         users.append(new_user)
         self.save_json_file(users)
