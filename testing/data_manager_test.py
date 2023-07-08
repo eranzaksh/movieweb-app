@@ -16,7 +16,7 @@ movie_names = [
     "Star Wars: Episode IV - A New Hope"
 ]
 
-
+##pytest test setup, before each, teardown
 def test_json_users_exception():
     data_manager = JSONDataManager('./storage_files/invalid_file.json')
     result = data_manager.get_all_users()

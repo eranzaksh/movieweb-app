@@ -1,9 +1,13 @@
+import secrets
+
 import requests
 from flask import Flask, render_template, request, redirect, url_for, flash
-from database_managers.json_data_manager_interface import JSONDataManager, UserIdAlreadyExists
+from database_managers.json_data_manager_interface import JSONDataManager, UserIdAlreadyExists, WrongPassword
 from database_managers.add_movies_methods import MovieAlreadyExists, NotFoundException
 
+secret_key = secrets.token_hex(16)
 app = Flask(__name__)
+app.secret_key = secret_key
 data_manager = JSONDataManager('./storage_files/json_database.json')
 
 
@@ -37,9 +41,27 @@ def add_movie(user_id):
         data_manager.add_movie(user_id, movie_name, "Director", "imdbRating", "Year", "Poster", "imdbID")
         return redirect(url_for("user_movies", user_id=user_id))
     except MovieAlreadyExists:
+        flash("Movie already exist on your list!")
         return redirect(url_for("user_movies", user_id=user_id))
     except NotFoundException:
+        flash("Movie not found on the database!")
         return redirect(url_for("user_movies", user_id=user_id))
+
+
+@app.route('/authenticate_user/<int:user_id>', methods=["GET", "POST"])
+def authenticate_user(user_id):
+    try:
+        if request.method == 'POST':
+            users = data_manager.get_all_users()
+            user = data_manager.fetch_user_by_id(user_id, users)
+            login_password = request.form.get('password')
+            hashed_pass = user['password']
+            data_manager.authenticate_user(login_password, hashed_pass)
+            return redirect(url_for("user_movies", user_id=user_id))
+        return render_template("authenticate_user.html", user_id=user_id)
+    except WrongPassword:
+        flash('Incorrect password!')
+        return render_template('authenticate_user.html', user_id=user_id)
 
 
 @app.route('/add_user', methods=['GET', 'POST'])
@@ -56,7 +78,14 @@ def add_user():
             return redirect(url_for("list_users"))
         return render_template('add_user.html')
     except UserIdAlreadyExists:
-        return "User Already Exists"
+        flash("User Already Exists!")
+        return render_template('add_user.html')
+    except TypeError:
+        flash("Passwords don't match!")
+        return render_template('add_user.html')
+    except WrongPassword:
+        flash("Password needs to be at least 8 characters")
+        return render_template('add_user.html')
 
 
 @app.route('/users/<int:user_id>', methods=['GET'])

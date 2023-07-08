@@ -29,6 +29,19 @@ article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
 	display: block;}
 
+.flashes-add-user{
+    color: darkred;
+    text-align: center;
+    float: right;
+    margin-right: 700px;
+    margin-top: 10px;
+}
+
+.flashes{
+    color: darkred;
+    text-align: center;
+    float: right;
+}
 
 .update-button {
   display: inline-block;

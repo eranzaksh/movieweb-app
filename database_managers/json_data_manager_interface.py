@@ -1,7 +1,7 @@
 import json
 import os
 import requests
-from flask_bcrypt import Bcrypt
+import bcrypt
 from .data_manager_interface import DataManagerInterface
 from .add_movies_methods import AddMovieMethods, NotFoundException
 
@@ -10,6 +10,10 @@ URL = f"http://www.omdbapi.com/?apikey={API_KEY}&t="
 
 
 class UserIdAlreadyExists(Exception):
+    pass
+
+
+class WrongPassword(Exception):
     pass
 
 
@@ -78,12 +82,23 @@ class JSONDataManager(DataManagerInterface):
         except requests.exceptions.RequestException:
             print("There is no internet connection!")
 
-    def create_user_password(self, password, confirm_password):
-        bcrypt = Bcrypt()
+    @staticmethod
+    def authenticate_user(user_pass, hashed_pass):
+        if bcrypt.checkpw(user_pass.encode("utf-8"), hashed_pass.encode("utf-8")):
+            return
+        else:
+            raise WrongPassword
+
+    @staticmethod
+    def create_user_password(password, confirm_password):
+        salt = bcrypt.gensalt()
         if password != confirm_password:
-            raise Exception("passwords don't match!")
-        password = bcrypt.generate_password_hash(password).decode('utf-8')
-        pass
+            raise TypeError("passwords don't match!")
+        if len(password) < 8:
+            raise WrongPassword("Password needs to be at least 8 characters")
+        password = password.encode("utf-8")
+        hashed_password = bcrypt.hashpw(password, salt).decode("utf-8")
+        return hashed_password
 
     def add_user(self, name, user_id, password, confirm_password):
         users = self.get_all_users()

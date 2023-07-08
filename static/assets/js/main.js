@@ -4,6 +4,15 @@
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
 
+setTimeout(function() {
+    $('.flashes').fadeOut('slow');
+}, 2000);
+
+setTimeout(function() {
+    $('.flashes-add-user').fadeOut('slow');
+}, 2000);
+
+
 (function($) {
 
 	var	$window = $(window),

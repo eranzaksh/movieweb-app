@@ -49,22 +49,29 @@
 					<div id="main">
 						<div class="inner">
 							<header>
-								<h1>All users list</h1>
+								<h1>Login</h1>
 							</header>
-
 							<section class="tiles">
-                                {% for user in users %}
-								<article class="style{{ loop.index }}">
-									 <div class="users">
-            							<li><strong><a href="/authenticate_user/{{ user.id }}">{{ user.name }}</a></strong></li>
-									</div>
+								<article class="style1">
+									{% with messages = get_flashed_messages() %}
+									  {% if messages %}
+										<ul class=flashes>
+										{% for message in messages %}
+										  <strong><li>{{ message }}</li></strong>
+										{% endfor %}
+										</ul>
+									  {% endif %}
+									{% endwith %}
+                                    <form action="/authenticate_user/{{ user_id }}" method="POST">
+										<label for="password">Password:</label>
+										<input type="password" id="password" name="password" required>
+                                        <br>
+                                        <input type="submit" value="Login">
+                                    </form>
 								</article>
-                                {% endfor %}
 							</section>
 						</div>
 					</div>
-				<hr>
-				<a href="/add_user" class="update-button">Click to add a user</a>
 
 		<!-- Scripts -->
 			<script src="{{ url_for('static', filename='assets/js/jquery.min.js') }}"></script>
