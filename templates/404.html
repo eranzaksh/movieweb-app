@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/main.css') }}" />
     <title>Not Found</title>
 </head>
 <body>
     <h1>{{ e }}</h1>
-    <p>The page you were looking for is missing!</p>
-    <a href="/">Click to return Home</a>
+    <a href="/" class="update-button">Click to return Home</a>
 </body>
 </html>
