@@ -22,6 +22,9 @@ class JSONDataManager(DataManagerInterface):
         self.filename = filename
 
     def fetch_movie_by_id(self, user_id, movie_id):
+        """
+        Return a movie of a user based on the user id and movie id
+        """
         user_movies = self.get_user_movies(user_id)
         for movie in user_movies:
             if movie['id'] == movie_id:
@@ -29,18 +32,27 @@ class JSONDataManager(DataManagerInterface):
 
     @staticmethod
     def fetch_user_by_id(user_id, users):
+        """
+        Return user object from all users based on the user id
+        """
         users = users
         for user in users:
             if user['id'] == str(user_id):
                 return user
 
     def save_json_file(self, data):
+        """
+        Saving new data to the json file
+        """
         json_data = json.dumps(data)
         with open(self.filename, 'w') as handle:
             handle.write(json_data)
         return json_data
 
-    def list_movies(self):
+    def list_users(self):
+        """
+        Return data of users from the json file, raise exception if the file doesn't exist
+        """
         if os.path.exists(self.filename):
             with open(self.filename, 'r') as handle:
                 if os.path.getsize(self.filename) == 0:
@@ -51,6 +63,9 @@ class JSONDataManager(DataManagerInterface):
             raise NotFoundException(f"File {self.filename} doesn't exist")
 
     def update_movie(self, user_id, movie_id, director, date, rating):
+        """
+        Updating a movie, can update its director, date, and rating.
+        """
         all_users = self.get_all_users()
         current_user = self.fetch_user_by_id(user_id, all_users)
         updated_movie = {"director": director, "year": date, "rating": rating}
@@ -60,6 +75,9 @@ class JSONDataManager(DataManagerInterface):
         self.save_json_file(all_users)
 
     def delete_movie(self, user_id, movie_id):
+        """
+        Deleting movie form the json file based on user id and movie id
+        """
         all_users = self.get_all_users()
         current_user_movie = self.fetch_movie_by_id(user_id, movie_id)
         user = self.fetch_user_by_id(user_id, all_users)
@@ -67,6 +85,10 @@ class JSONDataManager(DataManagerInterface):
         self.save_json_file(all_users)
 
     def add_movie(self, user_id, name, director, rating, year, poster, imdb_page):
+        """
+        Adding movie to the database based on parameters received from the app.py and sending them to the OMDB api
+        Then save the information on the json file
+        """
         movies_list = self.get_user_movies(user_id)
         users = self.get_all_users()
         if movies_list is None:
@@ -84,6 +106,10 @@ class JSONDataManager(DataManagerInterface):
 
     @staticmethod
     def authenticate_user(user_pass, hashed_pass):
+        """
+        Check if the password the user entered on the website
+        match the password which is stored in the json file
+        """
         if bcrypt.checkpw(user_pass.encode("utf-8"), hashed_pass.encode("utf-8")):
             return
         else:
@@ -91,6 +117,11 @@ class JSONDataManager(DataManagerInterface):
 
     @staticmethod
     def create_user_password(password, confirm_password):
+        """
+        Checking password is at least 8 characters and same as confirm_password
+         Then hashing the password and adding salt for better security
+         return the hashed password
+        """
         salt = bcrypt.gensalt()
         if password != confirm_password:
             raise TypeError("passwords don't match!")
@@ -101,6 +132,10 @@ class JSONDataManager(DataManagerInterface):
         return hashed_password
 
     def add_user(self, name, user_id, password, confirm_password):
+        """
+        Adding user with name, user_id and password (confirm_password should be the same as password)
+        getting them all from the app.py
+        """
         users = self.get_all_users()
         users_ids = [user['id'] for user in users]
         user_names = [user['name'] for user in users]
@@ -112,17 +147,22 @@ class JSONDataManager(DataManagerInterface):
         self.save_json_file(users)
 
     def get_all_users(self):
+        """
+        Getter for all users in the json file
+        """
         try:
-            all_users = self.list_movies()
+            all_users = self.list_users()
             return all_users
         except NotFoundException as e:
             return e
 
     def get_user_movies(self, user_id):
-        # return a list of all movies for given user
-        all_users = self.list_movies()
-        user_movies = [user for user in all_users if user['id'] == str(user_id)]
-        if user_movies:
-            return user_movies[0].get('movies')
+        """
+        List all the user movies based on user id
+        """
+        all_users = self.get_all_users()
+        user = self.fetch_user_by_id(user_id, all_users)
+        if user:
+            return user['movies']
         else:
             raise Exception("User not existing!")

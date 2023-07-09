@@ -19,6 +19,11 @@ def test_json_users_no_exception():
     assert isinstance(users, list)
 
 
+def test_get_user_movies():
+    data_manager = JSONDataManager('testing/testing.json')
+    user = data_manager.get_user_movies("1")
+
+
 def test_add_user_to_empty_json():
     json_data = []
     filepath = 'json_data.json'

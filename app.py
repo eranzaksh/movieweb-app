@@ -24,6 +24,9 @@ def logout():
 
 @login_manager.user_loader
 def loader_user(user_id):
+    """
+    Creating user object from a user in the json file to use for the flask_login
+    """
     users = data_manager.get_all_users()
     user_data = data_manager.fetch_user_by_id(user_id, users)
     if user_data:
@@ -32,16 +35,26 @@ def loader_user(user_id):
 
 @app.errorhandler(404)
 def page_not_found(e):
+    """
+    Page for displaying 404 errors
+    """
     return render_template('404.html', e=e), 404
 
 
 @app.errorhandler(401)
-def page_not_found(e):
+def forbidden_access(e):
+    """
+    Page for displaying 401 errors
+    """
     return render_template('401.html', e=e), 401
 
 
 @app.route('/users/<int:user_id>/update_movie/<int:movie_id>', methods=["GET", "POST"])
+@login_required
 def update_movie(user_id, movie_id):
+    """
+     A page to update some movie fields when the user presses on the "update" button.
+    """
     user_movie = data_manager.fetch_movie_by_id(user_id, movie_id)
     if request.method == 'POST':
         director = request.form.get("director")
@@ -53,13 +66,22 @@ def update_movie(user_id, movie_id):
 
 
 @app.route('/users/<int:user_id>/delete_movie/<int:movie_id>', methods=["POST"])
+@login_required
 def delete_movie(user_id, movie_id):
+    """
+    Deleting a movie from the database when the user clicks on "Delete" button on the website
+    """
     data_manager.delete_movie(user_id, movie_id)
     return redirect(url_for("user_movies", user_id=user_id))
 
 
 @app.route('/users/<int:user_id>/add_movie', methods=["POST"])
+@login_required
 def add_movie(user_id):
+    """
+    Adding movie to the user logged on based on the movie_name the user typing on the website.
+    Handling exceptions.
+    """
     movie_name = request.form.get("name")
     try:
         data_manager.add_movie(user_id, movie_name, "Director", "imdbRating", "Year", "Poster", "imdbID")
@@ -74,6 +96,11 @@ def add_movie(user_id):
 
 @app.route('/authenticate_user/<int:user_id>', methods=["GET", "POST"])
 def authenticate_user(user_id):
+    """
+    Checking the hashed password with password the user entered on the web site
+    Creating user object for session authentication with flask_login.
+    If no exception happen - login the user to the session using 'login_user'
+    """
     users = data_manager.get_all_users()
     user = data_manager.fetch_user_by_id(user_id, users)
     try:
@@ -92,6 +119,11 @@ def authenticate_user(user_id):
 
 @app.route('/add_user', methods=['GET', 'POST'])
 def add_user():
+    """
+    A web page for adding a user, getting name,password, confirmed_password from the user
+     and give the user a unique id.
+     Handling exception in case of password or user problems
+    """
     try:
         if request.method == 'POST':
             name = request.form.get('name')
@@ -117,6 +149,9 @@ def add_user():
 @app.route('/users/<int:user_id>', methods=['GET'])
 @login_required
 def user_movies(user_id):
+    """
+    Display a user's movies using the json_data_manager
+    """
     user = data_manager.get_user_movies(user_id)
     user_name = data_manager.fetch_user_by_id(user_id, data_manager.get_all_users())
     return render_template('/user_movies.html', user=user, user_id=user_id, user_name=user_name)
@@ -124,6 +159,9 @@ def user_movies(user_id):
 
 @app.route('/users')
 def list_users():
+    """
+    Listing all users from the json_data_manager and displaying in a web page
+    """
     try:
         users = data_manager.get_all_users()
         return render_template('/users.html', users=users)
@@ -133,6 +171,9 @@ def list_users():
 
 @app.route('/')
 def home():
+    """
+    Main web page
+    """
     return render_template("/index.html")
 
 

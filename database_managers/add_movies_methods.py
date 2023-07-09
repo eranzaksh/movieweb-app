@@ -12,10 +12,14 @@ class AddMovieMethods:
 
     @staticmethod
     def generating_new_movie(name, movies_list, movie_data, rating, year, poster, imdb_page, director):
+        """
+        Generating new_movie and movie id for the "add_movie" function
+        Return the movie dictionary
+        """
         movie_id = 0
         if movies_list:
-            movie_id = max(movies_list, key=lambda x: x['id'])
-            movie_id = movie_id['id'] + 1
+            movie = max(movies_list, key=lambda x: x['id'])
+            movie_id = movie['id'] + 1
         for movie in movies_list:
             if name.lower() in movie["name"].lower():
                 raise MovieAlreadyExists
@@ -28,6 +32,9 @@ class AddMovieMethods:
 
     @staticmethod
     def add_movie_to_user(users, user_id, new_movie):
+        """
+        Appending the new movie to the users movie list
+        """
         for user in users:
             if user['id'] == str(user_id):
                 user['movies'].append(new_movie)
