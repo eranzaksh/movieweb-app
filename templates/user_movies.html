@@ -58,14 +58,23 @@
 						{% endwith %}
 						<div class="inner">
 							<header>
+								{% if current_user.is_authenticated %}
+									<a href="{{ url_for('logout') }}" class="update-button">Logout</a>
+								{% endif %}
 								<h1>{{ user_name['name'] }}'s Movie list</h1>
 							</header>
 							<section class="tiles">
                                 {% for movie in user %}
 								<article class="style{{ loop.index }}">
+									{% if movie['poster'] != "N/A" %}
 									<span class="image">
 										<img src="{{ movie['poster'] }}" alt="Movie Poster">
 									</span>
+									{% else %}
+									<span class="image">
+										<img src="{{ url_for('static', filename='images/Generic_poster.jpg') }}" alt="Movie Poster">
+									</span>
+									{% endif %}
 									<a href="https://www.imdb.com/title/{{ movie['page'] }}" style="width: 400px;
 									height: 650px">
 									</a>

@@ -29,5 +29,5 @@ class AddMovieMethods:
     @staticmethod
     def add_movie_to_user(users, user_id, new_movie):
         for user in users:
-            if user['id'] == user_id:
+            if user['id'] == str(user_id):
                 user['movies'].append(new_movie)

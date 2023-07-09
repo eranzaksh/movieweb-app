@@ -31,7 +31,7 @@ class JSONDataManager(DataManagerInterface):
     def fetch_user_by_id(user_id, users):
         users = users
         for user in users:
-            if user['id'] == user_id:
+            if user['id'] == str(user_id):
                 return user
 
     def save_json_file(self, data):
@@ -105,7 +105,7 @@ class JSONDataManager(DataManagerInterface):
         users_ids = [user['id'] for user in users]
         user_names = [user['name'] for user in users]
         hashed_pass = self.create_user_password(password, confirm_password)
-        new_user = {"id": user_id, "name": name, "password": hashed_pass, "movies": []}
+        new_user = {"id": str(user_id), "name": name, "password": hashed_pass, "movies": []}
         if users is None:
             users = []
         if new_user['id'] in users_ids or new_user['name'] in user_names:
@@ -123,7 +123,7 @@ class JSONDataManager(DataManagerInterface):
     def get_user_movies(self, user_id):
         # return a list of all movies for given user
         all_users = self.list_movies()
-        user_movies = [user for user in all_users if user['id'] == user_id]
+        user_movies = [user for user in all_users if user['id'] == str(user_id)]
         if user_movies:
             return user_movies[0].get('movies')
         else:

@@ -53,12 +53,22 @@
 							</header>
 							<section class="tiles">
 								<article class="style1">
+									{% if movie['poster'] != "N/A" %}
 									<span class="image">
 										<img src="{{ movie['poster'] }}" alt="Movie Poster">
 									</span>
 									<a href="https://www.imdb.com/title/{{ movie['page'] }}" style="width: 400px;
 									height: 650px">
 									</a>
+									{% else %}
+									<span class="image">
+										<img src="{{ url_for('static', filename='images/Generic_poster.jpg') }}" alt="Movie Poster">
+									</span>
+
+									<a href="https://www.imdb.com/title/{{ movie['page'] }}" style="width: 400px;
+									height: 200px">
+									</a>
+									{% endif %}
                                     <form method="POST" action="/users/{{ user_id }}/update_movie/{{ movie.id }}">
                                         <ul>
                                             <li>

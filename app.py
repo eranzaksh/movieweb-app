@@ -1,19 +1,43 @@
 import secrets
-
-import requests
 from flask import Flask, render_template, request, redirect, url_for, flash
 from database_managers.json_data_manager_interface import JSONDataManager, UserIdAlreadyExists, WrongPassword
 from database_managers.add_movies_methods import MovieAlreadyExists, NotFoundException
+from database_managers.user_data_manager import User
+from flask_login import LoginManager, login_user, login_required, logout_user
 
-secret_key = secrets.token_hex(16)
 app = Flask(__name__)
+secret_key = secrets.token_hex(16)
 app.secret_key = secret_key
+login_manager = LoginManager()
+login_manager.init_app(app)
 data_manager = JSONDataManager('./storage_files/json_database.json')
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    # Log out the user and clear the session
+    logout_user()
+    flash('Logged out successfully!')
+    return redirect(url_for('home'))
+
+
+@login_manager.user_loader
+def loader_user(user_id):
+    users = data_manager.get_all_users()
+    user_data = data_manager.fetch_user_by_id(user_id, users)
+    if user_data:
+        return User(user_data)
 
 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html', e=e), 404
+
+
+@app.errorhandler(401)
+def page_not_found(e):
+    return render_template('401.html', e=e), 401
 
 
 @app.route('/users/<int:user_id>/update_movie/<int:movie_id>', methods=["GET", "POST"])
@@ -50,18 +74,20 @@ def add_movie(user_id):
 
 @app.route('/authenticate_user/<int:user_id>', methods=["GET", "POST"])
 def authenticate_user(user_id):
+    users = data_manager.get_all_users()
+    user = data_manager.fetch_user_by_id(user_id, users)
     try:
         if request.method == 'POST':
-            users = data_manager.get_all_users()
-            user = data_manager.fetch_user_by_id(user_id, users)
             login_password = request.form.get('password')
             hashed_pass = user['password']
             data_manager.authenticate_user(login_password, hashed_pass)
+            user_obj = User(user)
+            login_user(user_obj)
             return redirect(url_for("user_movies", user_id=user_id))
-        return render_template("authenticate_user.html", user_id=user_id)
+        return render_template("authenticate_user.html", user_id=user_id, user_name=user)
     except WrongPassword:
         flash('Incorrect password!')
-        return render_template('authenticate_user.html', user_id=user_id)
+        return render_template('authenticate_user.html', user_id=user_id, user_name=user)
 
 
 @app.route('/add_user', methods=['GET', 'POST'])
@@ -71,9 +97,10 @@ def add_user():
             name = request.form.get('name')
             password = request.form.get('password')
             confirm_password = request.form.get('confirm-password')
+            print(f"passwords in add_user: {password}, {confirm_password}")
             users = data_manager.get_all_users()
             user_id = max(users, key=lambda x: x['id'])
-            user_id = user_id['id'] + 1
+            user_id = int(user_id['id']) + 1
             data_manager.add_user(name, user_id, password, confirm_password)
             return redirect(url_for("list_users"))
         return render_template('add_user.html')
@@ -89,6 +116,7 @@ def add_user():
 
 
 @app.route('/users/<int:user_id>', methods=['GET'])
+@login_required
 def user_movies(user_id):
     user = data_manager.get_user_movies(user_id)
     user_name = data_manager.fetch_user_by_id(user_id, data_manager.get_all_users())
@@ -110,4 +138,4 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5005)

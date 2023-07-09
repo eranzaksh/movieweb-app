@@ -48,6 +48,15 @@
 				<!-- Main -->
 					<div id="main">
 						<div class="inner">
+							{% with messages = get_flashed_messages() %}
+							  {% if messages %}
+								<ul class=flashes>
+								{% for message in messages %}
+								  <strong><li>{{ message }}</li></strong>
+								{% endfor %}
+								</ul>
+							  {% endif %}
+							{% endwith %}
 							<header>
 								<h1>Welcome to my movies Web-App<br />
 								To see the list of users just click <a href="/users">HERE</a>.</h1>
@@ -61,10 +70,6 @@
 						</div>
 					</div>
 
-				<!-- Footer -->
-
-
-			</div>
 
 		<!-- Scripts -->
 			<script src="{{ url_for('static', filename='assets/js/jquery.min.js') }}"></script>
