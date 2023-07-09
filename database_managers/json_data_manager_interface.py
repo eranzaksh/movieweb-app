@@ -9,7 +9,7 @@ API_KEY = "711e7593"
 URL = f"http://www.omdbapi.com/?apikey={API_KEY}&t="
 
 
-class UserIdAlreadyExists(Exception):
+class UserAlreadyExists(Exception):
     pass
 
 
@@ -106,10 +106,8 @@ class JSONDataManager(DataManagerInterface):
         user_names = [user['name'] for user in users]
         hashed_pass = self.create_user_password(password, confirm_password)
         new_user = {"id": str(user_id), "name": name, "password": hashed_pass, "movies": []}
-        if users is None:
-            users = []
         if new_user['id'] in users_ids or new_user['name'] in user_names:
-            raise UserIdAlreadyExists
+            raise UserAlreadyExists
         users.append(new_user)
         self.save_json_file(users)
 

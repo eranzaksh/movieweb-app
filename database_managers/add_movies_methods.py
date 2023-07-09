@@ -12,10 +12,10 @@ class AddMovieMethods:
 
     @staticmethod
     def generating_new_movie(name, movies_list, movie_data, rating, year, poster, imdb_page, director):
-        movie_id = len(movies_list)
-        for movie in movies_list:
-            if movie_id == movie['id']:
-                movie_id += 1
+        movie_id = 0
+        if movies_list:
+            movie_id = max(movies_list, key=lambda x: x['id'])
+            movie_id = movie_id['id'] + 1
         for movie in movies_list:
             if name.lower() in movie["name"].lower():
                 raise MovieAlreadyExists

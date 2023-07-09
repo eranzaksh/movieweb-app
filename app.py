@@ -1,6 +1,6 @@
 import secrets
 from flask import Flask, render_template, request, redirect, url_for, flash
-from database_managers.json_data_manager_interface import JSONDataManager, UserIdAlreadyExists, WrongPassword
+from database_managers.json_data_manager_interface import JSONDataManager, UserAlreadyExists, WrongPassword
 from database_managers.add_movies_methods import MovieAlreadyExists, NotFoundException
 from database_managers.user_data_manager import User
 from flask_login import LoginManager, login_user, login_required, logout_user
@@ -97,14 +97,13 @@ def add_user():
             name = request.form.get('name')
             password = request.form.get('password')
             confirm_password = request.form.get('confirm-password')
-            print(f"passwords in add_user: {password}, {confirm_password}")
             users = data_manager.get_all_users()
-            user_id = max(users, key=lambda x: x['id'])
-            user_id = int(user_id['id']) + 1
+            user = max(users, key=lambda x: x['id'])
+            user_id = int(user['id']) + 1
             data_manager.add_user(name, user_id, password, confirm_password)
             return redirect(url_for("list_users"))
         return render_template('add_user.html')
-    except UserIdAlreadyExists:
+    except UserAlreadyExists:
         flash("User Already Exists!")
         return render_template('add_user.html')
     except TypeError:
