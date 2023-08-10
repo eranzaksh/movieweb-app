@@ -47,6 +47,15 @@
 
 				<!-- Main -->
 					<div id="main">
+						{% with messages = get_flashed_messages() %}
+						  {% if messages %}
+							<ul class=flashes-add-user>
+							{% for message in messages %}
+							  <strong><li>{{ message }}</li></strong>
+							{% endfor %}
+							</ul>
+						  {% endif %}
+						{% endwith %}
 						<div class="inner">
 							<header>
 								{% if current_user.is_authenticated %}

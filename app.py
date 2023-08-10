@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from database_managers.json_data_manager_interface import JSONDataManager, UserAlreadyExists, WrongPassword
 from database_managers.add_movies_methods import MovieAlreadyExists, NotFoundException
 from database_managers.user_data_manager import User
-from flask_login import LoginManager, login_user, login_required, logout_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
 secret_key = secrets.token_hex(16)
@@ -30,7 +30,8 @@ def loader_user(user_id):
     users = data_manager.get_all_users()
     user_data = data_manager.fetch_user_by_id(user_id, users)
     if user_data:
-        return User(user_data)
+        user = User(user_data)
+        return user
 
 
 @app.errorhandler(404)
@@ -97,7 +98,7 @@ def add_movie(user_id):
 @app.route('/authenticate_user/<int:user_id>', methods=["GET", "POST"])
 def authenticate_user(user_id):
     """
-    Checking the hashed password with password the user entered on the web site
+    Checking the hashed password with password the user entered on the website
     Creating user object for session authentication with flask_login.
     If no exception happen - login the user to the session using 'login_user'
     """
@@ -152,6 +153,9 @@ def user_movies(user_id):
     """
     Display a user's movies using the json_data_manager
     """
+    if current_user.get_id() != str(user_id):
+        flash("Unauthorized, login required!")
+        return redirect(url_for("list_users"))
     user = data_manager.get_user_movies(user_id)
     user_name = data_manager.fetch_user_by_id(user_id, data_manager.get_all_users())
     return render_template('/user_movies.html', user=user, user_id=user_id, user_name=user_name)
