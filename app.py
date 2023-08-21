@@ -6,10 +6,7 @@ from database_managers.add_movies_methods import MovieAlreadyExists, NotFoundExc
 from database_managers.user_data_manager import User
 from database_managers.sql_data_manager import SQLiteDataManager
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from flask_sqlalchemy import SQLAlchemy
 
-
-db = SQLAlchemy()
 app = Flask(__name__)
 secret_key = secrets.token_hex(16)
 app.secret_key = secret_key
@@ -17,10 +14,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 current_dir = os.path.abspath(os.path.dirname(__file__))
 db_path = os.path.join(current_dir, 'storage_files', 'favorites_movies.sqlite')
-data_manager = SQLiteDataManager(db_path)
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
-
-db.init_app(app)
+data_manager = SQLiteDataManager(db_path, app)
 
 
 @app.route('/logout')
