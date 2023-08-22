@@ -1,32 +1,33 @@
 from flask_sqlalchemy import SQLAlchemy
 
 
-db = SQLAlchemy()
-users_and_movies = db.Table('user_movie',
-                            db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-                            db.Column('movie_id', db.Integer, db.ForeignKey('movie.id')))
+db_orm = SQLAlchemy()
+
+users_and_movies = db_orm.Table('user_movie',
+                                db_orm.Column('user_id', db_orm.Integer, db_orm.ForeignKey('user.id')),
+                                db_orm.Column('movie_id', db_orm.Integer, db_orm.ForeignKey('movie.id')))
 
 
-class User(db.Model):
+class User(db_orm.Model):
     __tablename__ = "user"
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String, nullable=False)
-    password = db.Column(db.String)
-    movie = db.relationship("Movie", secondary=users_and_movies, back_populates="user")
+    id = db_orm.Column(db_orm.Integer, primary_key=True, autoincrement=True)
+    name = db_orm.Column(db_orm.String, nullable=False)
+    password = db_orm.Column(db_orm.String)
+    movie = db_orm.relationship("Movie", secondary=users_and_movies, back_populates="user")
 
 
-class Movie(db.Model):
+class Movie(db_orm.Model):
     __tablename__ = "movie"
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String, nullable=False)
-    rating = db.Column(db.Integer)
-    year = db.Column(db.Integer)
-    poster = db.Column(db.String)
-    page = db.Column(db.String)
-    director = db.Column(db.String)
-    user = db.relationship("User", secondary=users_and_movies, back_populates="movie")
+    id = db_orm.Column(db_orm.Integer, primary_key=True, autoincrement=True)
+    name = db_orm.Column(db_orm.String, nullable=False)
+    rating = db_orm.Column(db_orm.Integer)
+    year = db_orm.Column(db_orm.Integer)
+    poster = db_orm.Column(db_orm.String)
+    page = db_orm.Column(db_orm.String)
+    director = db_orm.Column(db_orm.String)
+    user = db_orm.relationship("User", secondary=users_and_movies, back_populates="movie")
 
 
 # user1 = User(

@@ -3,7 +3,7 @@ import os
 import requests
 import bcrypt
 from .data_manager_interface import DataManagerInterface
-from .add_movies_methods import AddMovieMethods, NotFoundException
+from .add_movies_methods_json import AddMovieMethods, NotFoundException
 
 API_KEY = "711e7593"
 URL = f"http://www.omdbapi.com/?apikey={API_KEY}&t="
@@ -30,12 +30,11 @@ class JSONDataManager(DataManagerInterface):
             if movie['id'] == movie_id:
                 return movie
 
-    @staticmethod
-    def fetch_user_by_id(user_id, users):
+    def fetch_user_by_id(self, user_id):
         """
         Return user object from all users based on the user id
         """
-        users = users
+        users = self.get_all_users()
         for user in users:
             if user['id'] == str(user_id):
                 return user
@@ -131,12 +130,14 @@ class JSONDataManager(DataManagerInterface):
         hashed_password = bcrypt.hashpw(password, salt).decode("utf-8")
         return hashed_password
 
-    def add_user(self, name, user_id, password, confirm_password):
+    def add_user(self, name, password, confirm_password):
         """
         Adding user with name, user_id and password (confirm_password should be the same as password)
         getting them all from the app.py
         """
         users = self.get_all_users()
+        user = max(users, key=lambda x: x['id'])
+        user_id = int(user['id']) + 1
         users_ids = [user['id'] for user in users]
         user_names = [user['name'] for user in users]
         hashed_pass = self.create_user_password(password, confirm_password)
