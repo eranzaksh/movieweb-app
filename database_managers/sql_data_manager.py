@@ -1,19 +1,13 @@
 import bcrypt
 import requests
-
+from sqlalchemy import and_
+from .json_data_manager_interface import WrongPassword, UserAlreadyExists
+from .add_movies_methods_json import MovieAlreadyExists
 from .data_manager_interface import DataManagerInterface
 from .sql_database import User, Movie, users_and_movies, db_orm
 
 API_KEY = "711e7593"
 URL = f"http://www.omdbapi.com/?apikey={API_KEY}&t="
-
-
-class WrongPassword(Exception):
-    pass
-
-
-class UserAlreadyExists:
-    pass
 
 
 class SQLiteDataManager(DataManagerInterface):
@@ -34,7 +28,8 @@ class SQLiteDataManager(DataManagerInterface):
         user = db_orm.session.query(User).filter(User.id == user_id).first()
         return user
 
-    def fetch_movie_by_id(self, user_id, movie_id):
+    @staticmethod
+    def fetch_movie_by_id(user_id, movie_id):
         movie = db_orm.session.query(users_and_movies).join(Movie).filter(users_and_movies.user_id == user_id).filter(
             users_and_movies.movie_id == movie_id).first()
         return movie
@@ -72,6 +67,9 @@ class SQLiteDataManager(DataManagerInterface):
         getting them all from the app.py
         """
         hashed_pass = self.create_user_password(password, confirm_password)
+        user = db_orm.session.query(User.name).filter(User.name == name).first()
+        if user:
+            raise UserAlreadyExists
         new_user = User(
             name=name,
             password=hashed_pass
@@ -79,7 +77,8 @@ class SQLiteDataManager(DataManagerInterface):
         db_orm.session.add(new_user)
         db_orm.session.commit()
 
-    def get_user_hashed_password(self, user_id):
+    @staticmethod
+    def get_user_hashed_password(user_id):
         password = db_orm.session.query(User.password).filter(User.id == user_id).first()
         return password
 
@@ -87,11 +86,22 @@ class SQLiteDataManager(DataManagerInterface):
     def add_movie(user_id, name, director, rating, year, poster, imdb_page):
         """
         Adding movie to the database based on parameters received from the app.py and sending them to the OMDB api
-        Then save the information on the json file
+        Then save the information on the sqlite file
         """
         try:
             res = requests.get(URL + name)
             movie_data = res.json()
+            user = db_orm.session.query(User).filter(User.id == user_id).first()
+            # movies = db_orm.session.query(Movie.name)
+            existed_movie = db_orm.session.query(Movie).filter(Movie.name == movie_data["Title"]).first()
+            # Check if the movie already exists in the Movie table. if it does, only add it to the user's list
+            if existed_movie:
+                # Check if movie already connected to the user
+                if existed_movie in user.movie:
+                    raise MovieAlreadyExists
+                user.movie.append(existed_movie)
+                db_orm.session.commit()
+                return
             new_movie = Movie(
                 name=movie_data["Title"],
                 rating=movie_data[rating],
@@ -100,7 +110,6 @@ class SQLiteDataManager(DataManagerInterface):
                 page=movie_data[imdb_page],
                 director=movie_data[director]
             )
-            user = db_orm.session.query(User).filter(User.id == user_id).first()
             db_orm.session.add(new_movie)
             user.movie.append(new_movie)
             db_orm.session.commit()

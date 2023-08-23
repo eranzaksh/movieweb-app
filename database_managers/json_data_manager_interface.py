@@ -9,11 +9,11 @@ API_KEY = "711e7593"
 URL = f"http://www.omdbapi.com/?apikey={API_KEY}&t="
 
 
-class UserAlreadyExists(Exception):
+class WrongPassword(Exception):
     pass
 
 
-class WrongPassword(Exception):
+class UserAlreadyExists(Exception):
     pass
 
 
@@ -66,7 +66,7 @@ class JSONDataManager(DataManagerInterface):
         Updating a movie, can update its director, date, and rating.
         """
         all_users = self.get_all_users()
-        current_user = self.fetch_user_by_id(user_id, all_users)
+        current_user = self.fetch_user_by_id(user_id)
         updated_movie = {"director": director, "year": date, "rating": rating}
         for movie in current_user['movies']:
             if movie['id'] == movie_id:
@@ -79,7 +79,7 @@ class JSONDataManager(DataManagerInterface):
         """
         all_users = self.get_all_users()
         current_user_movie = self.fetch_movie_by_id(user_id, movie_id)
-        user = self.fetch_user_by_id(user_id, all_users)
+        user = self.fetch_user_by_id(user_id)
         user['movies'].remove(current_user_movie)
         self.save_json_file(all_users)
 
@@ -161,8 +161,7 @@ class JSONDataManager(DataManagerInterface):
         """
         List all the user movies based on user id
         """
-        all_users = self.get_all_users()
-        user = self.fetch_user_by_id(user_id, all_users)
+        user = self.fetch_user_by_id(user_id)
         if user:
             return user['movies']
         else:

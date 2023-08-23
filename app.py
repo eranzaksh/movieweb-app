@@ -1,8 +1,8 @@
 import os
 import secrets
 from flask import Flask, render_template, request, redirect, url_for, flash
-from database_managers.json_data_manager_interface import JSONDataManager, UserAlreadyExists, WrongPassword
-from database_managers.add_movies_methods_json import MovieAlreadyExists, NotFoundException
+from database_managers.json_data_manager_interface import JSONDataManager, WrongPassword, UserAlreadyExists, NotFoundException
+from database_managers.add_movies_methods_json import MovieAlreadyExists
 from database_managers.user_data_manager import User
 from database_managers.sql_data_manager import SQLiteDataManager
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -134,7 +134,6 @@ def add_user():
             name = request.form.get('name')
             password = request.form.get('password')
             confirm_password = request.form.get('confirm-password')
-            print(password, confirm_password)
             data_manager.add_user(name, password, confirm_password)
             return redirect(url_for("list_users"))
         return render_template('add_user.html')
@@ -160,7 +159,7 @@ def user_movies(user_id):
         return redirect(url_for("list_users"))
     user = data_manager.get_user_movies(user_id)
     user_name = data_manager.fetch_user_by_id(user_id)
-    return render_template('/user_movies.html', user=user, user_id=user_id, user_name=user)
+    return render_template('/user_movies.html', user=user, user_id=user_id, user_name=user_name)
 
 
 @app.route('/users')
