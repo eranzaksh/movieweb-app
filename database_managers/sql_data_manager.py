@@ -2,7 +2,7 @@ import bcrypt
 import requests
 from sqlalchemy import and_
 from .json_data_manager_interface import WrongPassword, UserAlreadyExists
-from .add_movies_methods_json import MovieAlreadyExists
+from .add_movies_methods_json import MovieAlreadyExists, NotFoundException
 from .data_manager_interface import DataManagerInterface
 from .sql_database import User, Movie, users_and_movies, db_orm
 
@@ -28,11 +28,12 @@ class SQLiteDataManager(DataManagerInterface):
         user = db_orm.session.query(User).filter(User.id == user_id).first()
         return user
 
-    @staticmethod
-    def fetch_movie_by_id(user_id, movie_id):
-        movie = db_orm.session.query(users_and_movies).join(Movie).filter(users_and_movies.user_id == user_id).filter(
-            users_and_movies.movie_id == movie_id).first()
-        return movie
+    def fetch_user_movie_by_id(self, user_id, movie_id):
+        user = self.fetch_user_by_id(user_id)
+        for movie in user.movie:
+            if movie.id == movie_id:
+                return movie
+
 
     @staticmethod
     def authenticate_user(user_pass, hashed_pass):
@@ -92,6 +93,8 @@ class SQLiteDataManager(DataManagerInterface):
             res = requests.get(URL + name)
             movie_data = res.json()
             user = db_orm.session.query(User).filter(User.id == user_id).first()
+            if 'Error' in movie_data:
+                raise NotFoundException("Movie not found!")
             # movies = db_orm.session.query(Movie.name)
             existed_movie = db_orm.session.query(Movie).filter(Movie.name == movie_data["Title"]).first()
             # Check if the movie already exists in the Movie table. if it does, only add it to the user's list
@@ -116,3 +119,23 @@ class SQLiteDataManager(DataManagerInterface):
             return
         except requests.exceptions.RequestException:
             print("There is no internet connection!")
+
+    def update_movie(self, user_id, movie_id, director, year, rating):
+        """
+        Updating a movie, can update its director, date, and rating.
+        """
+        user = self.fetch_user_by_id(user_id)
+        for movie in user.movie:
+            if movie.id == movie_id:
+                movie.director = director
+                movie.year = year
+                movie.rating = float(rating)
+                db_orm.session.commit()
+                return
+                
+    def delete_movie(self, user_id, movie_id):
+        movie = self.fetch_user_movie_by_id(user_id, movie_id)
+        user = self.fetch_user_by_id(user_id)
+        user.movie.remove(movie)
+        db_orm.session.commit()
+        return

@@ -61,7 +61,7 @@ def update_movie(user_id, movie_id):
     """
      A page to update some movie fields when the user presses on the "update" button.
     """
-    user_movie = data_manager.fetch_movie_by_id(user_id, movie_id)
+    user_movie = data_manager.fetch_user_movie_by_id(user_id, movie_id)
     if request.method == 'POST':
         director = request.form.get("director")
         rating = request.form.get("rating")
