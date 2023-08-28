@@ -1,6 +1,5 @@
 import bcrypt
 import requests
-from sqlalchemy import and_
 from .json_data_manager_interface import WrongPassword, UserAlreadyExists
 from .add_movies_methods_json import MovieAlreadyExists, NotFoundException
 from .data_manager_interface import DataManagerInterface
@@ -20,7 +19,10 @@ class SQLiteDataManager(DataManagerInterface):
         return users
 
     def get_user_movies(self, user_id):
-        movies = db_orm.session.query(Movie).join(User.movie).filter(User.id == user_id).all()
+        movies = db_orm.session.query(Movie, users_and_movies.c.user_rating, users_and_movies.c.watched) \
+            .join(User.movie) \
+            .join(users_and_movies) \
+            .filter(User.id == user_id).all()
         return movies
 
     @staticmethod
@@ -28,13 +30,13 @@ class SQLiteDataManager(DataManagerInterface):
         user = db_orm.session.query(User).filter(User.id == user_id).first()
         return user
 
-    def fetch_user_movie_by_id(self, user_id, movie_id):
-        user = self.fetch_user_by_id(user_id)
-        for movie in user.movie:
-            if movie.id == movie_id:
-                return movie
-
-
+    @staticmethod
+    def fetch_user_movie_by_id(user_id, movie_id):
+        movie_data = db_orm.session.query(Movie, users_and_movies.c.user_rating, users_and_movies.c.watched) \
+            .join(User.movie) \
+            .join(users_and_movies) \
+            .filter(User.id == user_id).filter(Movie.id == movie_id).first()
+        return movie_data
     @staticmethod
     def authenticate_user(user_pass, hashed_pass):
         """
@@ -120,22 +122,17 @@ class SQLiteDataManager(DataManagerInterface):
         except requests.exceptions.RequestException:
             print("There is no internet connection!")
 
-    def update_movie(self, user_id, movie_id, director, year, rating):
+    def update_movie(self, user_id, movie_id, watched, user_rating):
         """
         Updating a movie, can update its director, date, and rating.
         """
-        user = self.fetch_user_by_id(user_id)
-        for movie in user.movie:
-            if movie.id == movie_id:
-                movie.director = director
-                movie.year = year
-                movie.rating = float(rating)
-                db_orm.session.commit()
-                return
-                
+        for movie in users_and_movies:
+            print(movie)
+            return
+
     def delete_movie(self, user_id, movie_id):
         movie = self.fetch_user_movie_by_id(user_id, movie_id)
         user = self.fetch_user_by_id(user_id)
-        user.movie.remove(movie)
+        user.movie.remove(movie[0])
         db_orm.session.commit()
         return

@@ -63,10 +63,9 @@ def update_movie(user_id, movie_id):
     """
     user_movie = data_manager.fetch_user_movie_by_id(user_id, movie_id)
     if request.method == 'POST':
-        director = request.form.get("director")
-        rating = request.form.get("rating")
-        release_date = request.form.get("year")
-        data_manager.update_movie(user_id, movie_id, director, release_date, rating)
+        watched = request.form.get("watched")
+        user_rating = request.form.get("user_rating")
+        data_manager.update_movie(user_id, movie_id, watched, user_rating)
         return redirect(url_for("user_movies", user_id=user_id))
     return render_template("update_movie.html", user_id=user_id, movie=user_movie)
 

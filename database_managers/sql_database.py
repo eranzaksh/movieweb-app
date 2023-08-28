@@ -1,11 +1,12 @@
 from flask_sqlalchemy import SQLAlchemy
 
-
 db_orm = SQLAlchemy()
 
 users_and_movies = db_orm.Table('user_movie',
                                 db_orm.Column('user_id', db_orm.Integer, db_orm.ForeignKey('user.id')),
-                                db_orm.Column('movie_id', db_orm.Integer, db_orm.ForeignKey('movie.id')))
+                                db_orm.Column('movie_id', db_orm.Integer, db_orm.ForeignKey('movie.id')),
+                                db_orm.Column('user_rating', db_orm.Integer),
+                                db_orm.Column('watched', db_orm.String, default='False'))
 
 
 class User(db_orm.Model):
@@ -47,6 +48,3 @@ class Movie(db_orm.Model):
 # user1.movie.append(movie1)
 
 
-# with app.app_context():
-#     db.session.add(user1)
-#     db.session.commit()
