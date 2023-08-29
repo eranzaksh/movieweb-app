@@ -4,6 +4,7 @@ from .json_data_manager_interface import WrongPassword, UserAlreadyExists
 from .add_movies_methods_json import MovieAlreadyExists, NotFoundException
 from .data_manager_interface import DataManagerInterface
 from .sql_database import User, Movie, users_and_movies, db_orm
+from sqlalchemy.orm.exc import NoResultFound
 
 API_KEY = "711e7593"
 URL = f"http://www.omdbapi.com/?apikey={API_KEY}&t="
@@ -20,9 +21,8 @@ class SQLiteDataManager(DataManagerInterface):
 
     def get_user_movies(self, user_id):
         movies = db_orm.session.query(Movie, users_and_movies.c.user_rating, users_and_movies.c.watched) \
-            .join(User.movie) \
-            .join(users_and_movies) \
-            .filter(User.id == user_id).all()
+            .join(users_and_movies, users_and_movies.c.movie_id == Movie.id) \
+            .filter(users_and_movies.c.user_id == user_id).all()
         return movies
 
     @staticmethod
@@ -37,6 +37,7 @@ class SQLiteDataManager(DataManagerInterface):
             .join(users_and_movies) \
             .filter(User.id == user_id).filter(Movie.id == movie_id).first()
         return movie_data
+
     @staticmethod
     def authenticate_user(user_pass, hashed_pass):
         """
@@ -97,7 +98,6 @@ class SQLiteDataManager(DataManagerInterface):
             user = db_orm.session.query(User).filter(User.id == user_id).first()
             if 'Error' in movie_data:
                 raise NotFoundException("Movie not found!")
-            # movies = db_orm.session.query(Movie.name)
             existed_movie = db_orm.session.query(Movie).filter(Movie.name == movie_data["Title"]).first()
             # Check if the movie already exists in the Movie table. if it does, only add it to the user's list
             if existed_movie:
@@ -122,17 +122,28 @@ class SQLiteDataManager(DataManagerInterface):
         except requests.exceptions.RequestException:
             print("There is no internet connection!")
 
-    def update_movie(self, user_id, movie_id, watched, user_rating):
+    @staticmethod
+    def update_movie(user_id, movie_id, watched, user_rating):
         """
         Updating a movie, can update its director, date, and rating.
         """
-        for movie in users_and_movies:
-            print(movie)
-            return
+        db_orm.session.query(users_and_movies) \
+            .filter(users_and_movies.c.movie_id == movie_id) \
+            .filter(users_and_movies.c.user_id == user_id) \
+            .update({users_and_movies.c.user_rating: user_rating, users_and_movies.c.watched: watched})
+        db_orm.session.commit()
+        return
 
     def delete_movie(self, user_id, movie_id):
         movie = self.fetch_user_movie_by_id(user_id, movie_id)
         user = self.fetch_user_by_id(user_id)
         user.movie.remove(movie[0])
         db_orm.session.commit()
+        try:
+            db_orm.session.query(users_and_movies.c.movie_id) \
+                .filter(users_and_movies.c.movie_id == movie_id).one()
+        except NoResultFound:
+            movie = db_orm.session.query(Movie).filter(Movie.id == movie_id).one()
+            db_orm.session.delete(movie)
+            db_orm.session.commit()
         return
