@@ -3,7 +3,7 @@ from random import randint
 import secrets
 import pytest
 from .json_data_manager_interface import JSONDataManager, WrongPassword, UserAlreadyExists
-from .add_movies_methods import NotFoundException, MovieAlreadyExists
+from .add_movies_methods_json import NotFoundException, MovieAlreadyExists
 import json
 
 

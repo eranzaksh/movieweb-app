@@ -55,9 +55,9 @@
 								<article class="style1">
 									{% if movie['poster'] != "N/A" %}
 									<span class="image">
-										<img src="{{ movie['poster'] }}" alt="Movie Poster">
+										<img src="{{ movie[0]['poster'] }}" alt="Movie Poster">
 									</span>
-									<a href="https://www.imdb.com/title/{{ movie['page'] }}" style="width: 400px;
+									<a href="https://www.imdb.com/title/{{ movie[0]['page'] }}" style="width: 400px;
 									height: 550px">
 									</a>
 									{% else %}
@@ -65,23 +65,22 @@
 										<img src="{{ url_for('static', filename='images/Generic_poster.jpg') }}" alt="Movie Poster">
 									</span>
 
-									<a href="https://www.imdb.com/title/{{ movie['page'] }}" style="width: 400px;
+									<a href="https://www.imdb.com/title/{{ movie[0]['page'] }}" style="width: 400px;
 									height: 200px">
 									</a>
 									{% endif %}
-                                    <form method="POST" action="/users/{{ user_id }}/update_movie/{{ movie.id }}">
+                                    <form method="POST" action="/users/{{ user_id }}/update_movie/{{ movie[0].id }}">
                                         <ul>
                                             <li>
-                                                <label for="director">Director:</label>
-                                                <input type="text" id="director" name="director" value="{{ movie['director'] }}">
+                                                <label for="watched">Watched:</label>
+													<select id="watched" name="watched">
+														<option value="yes">Yes</option>
+														<option value="no">No</option>
+													</select>
                                             </li>
                                             <li>
-                                                <label for="rating">Movie Rating:</label>
-                                                <input type="text" id="rating" name="rating" value="{{ movie['rating'] }}">
-                                            </li>
-                                            <li>
-                                                <label for="year">Release Date:</label>
-                                                <input type="text" id="year" name="year" value="{{ movie['year'] }}">
+                                                <label for="user_rating">My Rating:</label>
+                                                <input type="number" id="user_rating" name="user_rating" value="{{ movie[1] }}" step="0.1">
                                             </li>
                                         </ul>
                                         <input type="submit" value="Update">

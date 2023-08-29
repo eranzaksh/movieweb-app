@@ -3,17 +3,17 @@ import os
 import requests
 import bcrypt
 from .data_manager_interface import DataManagerInterface
-from .add_movies_methods import AddMovieMethods, NotFoundException
+from .add_movies_methods_json import AddMovieMethods, NotFoundException
 
 API_KEY = "711e7593"
 URL = f"http://www.omdbapi.com/?apikey={API_KEY}&t="
 
 
-class UserAlreadyExists(Exception):
+class WrongPassword(Exception):
     pass
 
 
-class WrongPassword(Exception):
+class UserAlreadyExists(Exception):
     pass
 
 
@@ -30,12 +30,11 @@ class JSONDataManager(DataManagerInterface):
             if movie['id'] == movie_id:
                 return movie
 
-    @staticmethod
-    def fetch_user_by_id(user_id, users):
+    def fetch_user_by_id(self, user_id):
         """
         Return user object from all users based on the user id
         """
-        users = users
+        users = self.get_all_users()
         for user in users:
             if user['id'] == str(user_id):
                 return user
@@ -67,7 +66,7 @@ class JSONDataManager(DataManagerInterface):
         Updating a movie, can update its director, date, and rating.
         """
         all_users = self.get_all_users()
-        current_user = self.fetch_user_by_id(user_id, all_users)
+        current_user = self.fetch_user_by_id(user_id)
         updated_movie = {"director": director, "year": date, "rating": rating}
         for movie in current_user['movies']:
             if movie['id'] == movie_id:
@@ -80,7 +79,7 @@ class JSONDataManager(DataManagerInterface):
         """
         all_users = self.get_all_users()
         current_user_movie = self.fetch_movie_by_id(user_id, movie_id)
-        user = self.fetch_user_by_id(user_id, all_users)
+        user = self.fetch_user_by_id(user_id)
         user['movies'].remove(current_user_movie)
         self.save_json_file(all_users)
 
@@ -131,12 +130,14 @@ class JSONDataManager(DataManagerInterface):
         hashed_password = bcrypt.hashpw(password, salt).decode("utf-8")
         return hashed_password
 
-    def add_user(self, name, user_id, password, confirm_password):
+    def add_user(self, name, password, confirm_password):
         """
         Adding user with name, user_id and password (confirm_password should be the same as password)
         getting them all from the app.py
         """
         users = self.get_all_users()
+        user = max(users, key=lambda x: x['id'])
+        user_id = int(user['id']) + 1
         users_ids = [user['id'] for user in users]
         user_names = [user['name'] for user in users]
         hashed_pass = self.create_user_password(password, confirm_password)
@@ -160,8 +161,7 @@ class JSONDataManager(DataManagerInterface):
         """
         List all the user movies based on user id
         """
-        all_users = self.get_all_users()
-        user = self.fetch_user_by_id(user_id, all_users)
+        user = self.fetch_user_by_id(user_id)
         if user:
             return user['movies']
         else:

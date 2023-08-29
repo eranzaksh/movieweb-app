@@ -68,27 +68,29 @@
 								<article class="style{{ loop.index }}">
 									{% if movie['poster'] != "N/A" %}
 									<span class="image">
-										<img src="{{ movie['poster'] }}" alt="Movie Poster">
+										<img src="{{ movie[0]['poster'] }}" alt="Movie Poster">
 									</span>
 									{% else %}
 									<span class="image">
 										<img src="{{ url_for('static', filename='images/Generic_poster.jpg') }}" alt="Movie Poster">
 									</span>
 									{% endif %}
-									<a href="https://www.imdb.com/title/{{ movie['page'] }}" style="width: 400px;
+									<a href="https://www.imdb.com/title/{{ movie[0]['page'] }}" style="width: 400px;
 									height: 650px">
 									</a>
 									<ul>
-										<li><h3>{{ movie['name'] }}</h3></li>
-										<li><em>Director: {{ movie['director'] }}</em></li>
-										<li>Movie Rating:  {{ movie['rating'] }}</li>
-										<li>Release Date:  {{ movie['year'] }}</li>
+										<li><h3>{{ movie[0]['name'] }}</h3></li>
+										<li><em>Director: {{ movie[0]['director'] }}</em></li>
+										<li>Movie Rating:  {{ movie[0]['rating'] }}</li>
+										<li>Release Date:  {{ movie[0]['year'] }}</li>
+										<li><strong>My Rating: {{ movie[1] }}</strong></li>
+										<li><strong>Watched: {{ movie[2] }}</strong></li>
 									</ul>
 									<li class="delete-update">
-										<form method="POST" action="/users/{{ user_id }}/delete_movie/{{ movie.id }}">
+										<form method="POST" action="/users/{{ user_id }}/delete_movie/{{ movie[0].id }}">
 											<input type="submit" value="Delete">
 										</form>
-										<a href="{{ url_for('update_movie', user_id=user_id, movie_id=movie.id) }}" class="update-button">Update</a>
+										<a href="{{ url_for('update_movie', user_id=user_id, movie_id=movie[0].id) }}" class="update-button">Update</a>
 									</li>
 								</article>
                                 {% endfor %}

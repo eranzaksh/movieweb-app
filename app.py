@@ -1,25 +1,23 @@
 import os
 import secrets
 from flask import Flask, render_template, request, redirect, url_for, flash
-from database_managers.json_data_manager_interface import JSONDataManager, UserAlreadyExists, WrongPassword
-from database_managers.add_movies_methods import MovieAlreadyExists, NotFoundException
+from database_managers.json_data_manager_interface import JSONDataManager, WrongPassword, UserAlreadyExists, \
+    NotFoundException
+from database_managers.add_movies_methods_json import MovieAlreadyExists
 from database_managers.user_data_manager import User
 from database_managers.sql_data_manager import SQLiteDataManager
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 secret_key = secrets.token_hex(16)
 app.secret_key = secret_key
 login_manager = LoginManager()
 login_manager.init_app(app)
+
 current_dir = os.path.abspath(os.path.dirname(__file__))
 db_path = os.path.join(current_dir, 'storage_files', 'favorites_movies.sqlite')
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
-
-SQLiteDataManager.db.init_app(app)
-data_manager = SQLiteDataManager(db_path)
+data_manager = SQLiteDataManager(db_path, app)
 
 
 @app.route('/logout')
@@ -37,7 +35,7 @@ def loader_user(user_id):
     Creating user object from a user in the json file to use for the flask_login
     """
     users = data_manager.get_all_users()
-    user_data = data_manager.fetch_user_by_id(user_id, users)
+    user_data = data_manager.fetch_user_by_id(user_id)
     if user_data:
         user = User(user_data)
         return user
@@ -65,12 +63,11 @@ def update_movie(user_id, movie_id):
     """
      A page to update some movie fields when the user presses on the "update" button.
     """
-    user_movie = data_manager.fetch_movie_by_id(user_id, movie_id)
+    user_movie = data_manager.fetch_user_movie_by_id(user_id, movie_id)
     if request.method == 'POST':
-        director = request.form.get("director")
-        rating = request.form.get("rating")
-        release_date = request.form.get("year")
-        data_manager.update_movie(user_id, movie_id, director, release_date, rating)
+        watched = request.form.get("watched")
+        user_rating = request.form.get("user_rating")
+        data_manager.update_movie(user_id, movie_id, watched, user_rating)
         return redirect(url_for("user_movies", user_id=user_id))
     return render_template("update_movie.html", user_id=user_id, movie=user_movie)
 
@@ -111,12 +108,11 @@ def authenticate_user(user_id):
     Creating user object for session authentication with flask_login.
     If no exception happen - login the user to the session using 'login_user'
     """
-    users = data_manager.get_all_users()
-    user = data_manager.fetch_user_by_id(user_id, users)
+    user = data_manager.fetch_user_by_id(user_id)
     try:
         if request.method == 'POST':
             login_password = request.form.get('password')
-            hashed_pass = user['password']
+            hashed_pass = data_manager.get_user_hashed_password(user_id)
             data_manager.authenticate_user(login_password, hashed_pass)
             user_obj = User(user)
             login_user(user_obj)
@@ -139,10 +135,7 @@ def add_user():
             name = request.form.get('name')
             password = request.form.get('password')
             confirm_password = request.form.get('confirm-password')
-            users = data_manager.get_all_users()
-            user = max(users, key=lambda x: x['id'])
-            user_id = int(user['id']) + 1
-            data_manager.add_user(name, user_id, password, confirm_password)
+            data_manager.add_user(name, password, confirm_password)
             return redirect(url_for("list_users"))
         return render_template('add_user.html')
     except UserAlreadyExists:
@@ -166,7 +159,7 @@ def user_movies(user_id):
         flash("Unauthorized, login required!")
         return redirect(url_for("list_users"))
     user = data_manager.get_user_movies(user_id)
-    user_name = data_manager.fetch_user_by_id(user_id, data_manager.get_all_users())
+    user_name = data_manager.fetch_user_by_id(user_id)
     return render_template('/user_movies.html', user=user, user_id=user_id, user_name=user_name)
 
 
