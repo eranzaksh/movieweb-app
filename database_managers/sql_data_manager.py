@@ -3,9 +3,8 @@ import requests
 from .json_data_manager_interface import WrongPassword, UserAlreadyExists
 from .add_movies_methods_json import MovieAlreadyExists, NotFoundException
 from .data_manager_interface import DataManagerInterface
-from .sql_database import User, Movie, users_and_movies, db_orm
+from .sql_database import User, Movie, users_and_movies, db_orm, Reviews
 from sqlalchemy.orm.exc import NoResultFound
-
 
 API_KEY = "711e7593"
 URL = f"http://www.omdbapi.com/?apikey={API_KEY}&t="
@@ -16,10 +15,13 @@ class SQLiteDataManager(DataManagerInterface):
         app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_file_name}"
         db_orm.init_app(app)
 
-
     def get_all_users(self):
         users = db_orm.session.query(User)
         return users
+
+    def get_all_movies(self):
+        movies = db_orm.session.query(Movie)
+        return movies
 
     def get_user_movies(self, user_id):
         movies = db_orm.session.query(Movie, users_and_movies.c.user_rating, users_and_movies.c.watched) \
@@ -39,6 +41,24 @@ class SQLiteDataManager(DataManagerInterface):
             .join(users_and_movies) \
             .filter(User.id == user_id).filter(Movie.id == movie_id).first()
         return movie_data
+
+    def add_review(self, movie_id, review):
+        reviews = db_orm.session.query(Reviews.movie_id).all()
+        movies = db_orm.session.query(Reviews.review, Movie.name).join(Movie).all()
+        if reviews and movie_id in reviews[0]:
+            new_review = Reviews(
+                review=review
+            )
+            db_orm.session.add(new_review)
+            db_orm.session.commit()
+        else:
+            new_review = Reviews(
+                review=review,
+                movie_id=movie_id
+            )
+            db_orm.session.add(new_review)
+            db_orm.session.commit()
+        return
 
     @staticmethod
     def authenticate_user(user_pass, hashed_pass):
@@ -145,7 +165,10 @@ class SQLiteDataManager(DataManagerInterface):
             db_orm.session.query(users_and_movies.c.movie_id) \
                 .filter(users_and_movies.c.movie_id == movie_id).one()
         except NoResultFound:
-            movie = db_orm.session.query(Movie).filter(Movie.id == movie_id).one()
-            db_orm.session.delete(movie)
-            db_orm.session.commit()
-        return
+            try:
+                movie = db_orm.session.query(Movie).filter(Movie.id == movie_id).one()
+                db_orm.session.delete(movie)
+                db_orm.session.commit()
+                return
+            except NoResultFound:
+                return

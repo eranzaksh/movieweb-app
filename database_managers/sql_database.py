@@ -31,20 +31,9 @@ class Movie(db_orm.Model):
     user = db_orm.relationship("User", secondary=users_and_movies, back_populates="movie")
 
 
-# user1 = User(
-#     name="eran",
-#     password="123qweasdx"
-# )
-# movie1 = Movie(
-#     name="titanic",
-#     rating=8,
-#     year=1999,
-#     poster="test",
-#     page="test",
-#     director="someone"
-# )
+class Reviews(db_orm.Model):
+    __tablename__ = "reviews"
 
-
-# user1.movie.append(movie1)
-
-
+    id = db_orm.Column(db_orm.Integer, primary_key=True, autoincrement=True)
+    movie_id = db_orm.Column(db_orm.Integer, db_orm.ForeignKey('movie.id'))
+    review = db_orm.Column(db_orm.String)

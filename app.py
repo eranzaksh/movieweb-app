@@ -19,7 +19,6 @@ db_path = os.path.join(current_dir, 'storage_files', 'favorites_movies.sqlite')
 
 data_manager = SQLiteDataManager(db_path, app)
 
-
 @app.route('/logout')
 @login_required
 def logout():
@@ -55,6 +54,20 @@ def forbidden_access(e):
     Page for displaying 401 errors
     """
     return render_template('401.html', e=e), 401
+
+
+@app.route('/add_review', methods=["GET", "POST"])
+def add_review():
+    """
+    Adding an anonymous review for a movie
+    """
+    movies = data_manager.get_all_movies()
+    if request.method == 'POST':
+        movie = request.form.get("movie")
+        review = request.form.get("review")
+        data_manager.add_review(movie, review)
+        return redirect(url_for("add_review", movies=movies))
+    return render_template("add_review.html", movies=movies)
 
 
 @app.route('/users/<int:user_id>/update_movie/<int:movie_id>', methods=["GET", "POST"])
