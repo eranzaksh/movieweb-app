@@ -59,7 +59,7 @@
 						<div class="inner">
 							<header>
 								{% if current_user.is_authenticated %}
-								<a href="{{ url_for('logout') }}" class="update-button">Logout</a>
+								<a href="{{ url_for('logout') }}" class="update-button">Logout {{ current_user.name }}</a>
 								{% endif %}
 								<h1>All users list</h1>
 							</header>

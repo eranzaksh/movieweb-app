@@ -19,6 +19,7 @@ db_path = os.path.join(current_dir, 'storage_files', 'favorites_movies.sqlite')
 
 data_manager = SQLiteDataManager(db_path, app)
 
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -56,10 +57,18 @@ def forbidden_access(e):
     return render_template('401.html', e=e), 401
 
 
+@app.route('/all_reviews', methods=["GET"])
+def all_reviews():
+    movies = data_manager.get_all_movies()
+    reviews = data_manager.get_all_reviews()
+    return render_template("all_reviews.html", movies=movies)
+
+
 @app.route('/add_review', methods=["GET", "POST"])
 def add_review():
     """
     Adding an anonymous review for a movie
+    NEED TO ADD A PAGE TO SEE ALL REVIEWS IN A DECENT WAY
     """
     movies = data_manager.get_all_movies()
     if request.method == 'POST':

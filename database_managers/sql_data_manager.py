@@ -16,12 +16,15 @@ class SQLiteDataManager(DataManagerInterface):
         db_orm.init_app(app)
 
     def get_all_users(self):
-        users = db_orm.session.query(User)
-        return users
+        return db_orm.session.query(User)
 
-    def get_all_movies(self):
-        movies = db_orm.session.query(Movie)
-        return movies
+    @staticmethod
+    def get_all_reviews():
+        return db_orm.session.query(Reviews)
+
+    @staticmethod
+    def get_all_movies():
+        return db_orm.session.query(Movie)
 
     def get_user_movies(self, user_id):
         movies = db_orm.session.query(Movie, users_and_movies.c.user_rating, users_and_movies.c.watched) \
@@ -43,9 +46,9 @@ class SQLiteDataManager(DataManagerInterface):
         return movie_data
 
     def add_review(self, movie_id, review):
-        reviews = db_orm.session.query(Reviews.movie_id).all()
+        reviewed_movies = db_orm.session.query(Reviews.movie_id).all()
         movies = db_orm.session.query(Reviews.review, Movie.name).join(Movie).all()
-        if reviews and movie_id in reviews[0]:
+        if reviewed_movies and movie_id in reviewed_movies[0]:
             new_review = Reviews(
                 review=review
             )
