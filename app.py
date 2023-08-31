@@ -57,11 +57,15 @@ def forbidden_access(e):
     return render_template('401.html', e=e), 401
 
 
+# @app.route('/')#delete review
+
 @app.route('/all_reviews', methods=["GET"])
 def all_reviews():
-    movies = data_manager.get_all_movies()
-    reviews = data_manager.get_all_reviews()
-    return render_template("all_reviews.html", movies=movies)
+    movie_reviews = {}
+    movies = data_manager.get_reviewed_movies()
+    for review in movies:
+        movie_reviews[review[0]] = review[1].split(',')
+    return render_template("all_reviews.html", movie_reviews=movie_reviews)
 
 
 @app.route('/add_review', methods=["GET", "POST"])

@@ -1,5 +1,7 @@
 import bcrypt
 import requests
+from sqlalchemy import func
+
 from .json_data_manager_interface import WrongPassword, UserAlreadyExists
 from .add_movies_methods_json import MovieAlreadyExists, NotFoundException
 from .data_manager_interface import DataManagerInterface
@@ -19,8 +21,11 @@ class SQLiteDataManager(DataManagerInterface):
         return db_orm.session.query(User)
 
     @staticmethod
-    def get_all_reviews():
-        return db_orm.session.query(Reviews)
+    def get_reviewed_movies():
+        return db_orm.session.query(Movie, func.group_concat(Reviews.review) \
+                                    .label('all_reviews')) \
+            .join(Reviews, Movie.id == Reviews.movie_id) \
+            .group_by(Movie.id)
 
     @staticmethod
     def get_all_movies():
