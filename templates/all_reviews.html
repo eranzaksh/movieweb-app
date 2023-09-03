@@ -64,7 +64,7 @@
 								<h1>Movies reviews</h1>
 							</header>
 							<section class="tiles">
-                                {% for movie in movie_reviews %}
+                                {% for movie in movies_with_reviews %}
 								<article class="style{{ loop.index }}">
 									{% if movie['poster'] != "N/A" %}
 									<span class="image">
@@ -81,10 +81,10 @@
 									<ul>
 										<li><p>{{ movie['name'] }}</p></li>
 										<li><h2>Reviews:</h2></li>
-										{% for review in movie_reviews[movie] %}
-											<li><em>"{{ review }}"</em></li>
+										{% for review in movies_with_reviews[movie] %}
+											<li><em>"{{ review.review }}"</em></li>
 											<li class="delete-update">
-												<form method="POST" action="/delete_review">
+												<form method="POST" action="/all_reviews/delete_review/{{ review.id }}">
 													<input type="submit" value="Delete">
 												</form>
 											</li>

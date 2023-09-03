@@ -7,8 +7,10 @@ from database_managers.add_movies_methods_json import MovieAlreadyExists
 from database_managers.user_data_manager import User
 from database_managers.sql_data_manager import SQLiteDataManager
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from api import api
 
 app = Flask(__name__)
+app.register_blueprint(api, url_prefix='/api')
 secret_key = secrets.token_hex(16)
 app.secret_key = secret_key
 login_manager = LoginManager()
@@ -57,22 +59,32 @@ def forbidden_access(e):
     return render_template('401.html', e=e), 401
 
 
-# @app.route('/')#delete review
+@app.route('/all_reviews/delete_review/<int:review_id>', methods=["POST"])
+def delete_review(review_id):
+    data_manager.delete_review(review_id)
+    return redirect(url_for("all_reviews"))
+
 
 @app.route('/all_reviews', methods=["GET"])
 def all_reviews():
-    movie_reviews = {}
-    movies = data_manager.get_reviewed_movies()
-    for review in movies:
-        movie_reviews[review[0]] = review[1].split(',')
-    return render_template("all_reviews.html", movie_reviews=movie_reviews)
+    movies_with_reviews = {}
+    movies_and_reviews = data_manager.get_reviewed_movies()
+
+    for movie, review in movies_and_reviews:
+        if movie not in movies_with_reviews:
+            movies_with_reviews[movie] = []
+
+        movies_with_reviews[movie].append({
+            'id': review.id,
+            'review': review.review
+        })
+    return render_template("all_reviews.html", movies_with_reviews=movies_with_reviews)
 
 
 @app.route('/add_review', methods=["GET", "POST"])
 def add_review():
     """
     Adding an anonymous review for a movie
-    NEED TO ADD A PAGE TO SEE ALL REVIEWS IN A DECENT WAY
     """
     movies = data_manager.get_all_movies()
     if request.method == 'POST':

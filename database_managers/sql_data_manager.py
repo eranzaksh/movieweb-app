@@ -22,10 +22,7 @@ class SQLiteDataManager(DataManagerInterface):
 
     @staticmethod
     def get_reviewed_movies():
-        return db_orm.session.query(Movie, func.group_concat(Reviews.review) \
-                                    .label('all_reviews')) \
-            .join(Reviews, Movie.id == Reviews.movie_id) \
-            .group_by(Movie.id)
+        return db_orm.session.query(Movie, Reviews).join(Reviews).all()
 
     @staticmethod
     def get_all_movies():
@@ -50,9 +47,16 @@ class SQLiteDataManager(DataManagerInterface):
             .filter(User.id == user_id).filter(Movie.id == movie_id).first()
         return movie_data
 
-    def add_review(self, movie_id, review):
+    @staticmethod
+    def delete_review(review_id):
+        a_movie_review = db_orm.session.query(Reviews).filter(Reviews.id == review_id).one()
+        db_orm.session.delete(a_movie_review)
+        db_orm.session.commit()
+        return
+
+    @staticmethod
+    def add_review(movie_id, review):
         reviewed_movies = db_orm.session.query(Reviews.movie_id).all()
-        movies = db_orm.session.query(Reviews.review, Movie.name).join(Movie).all()
         if reviewed_movies and movie_id in reviewed_movies[0]:
             new_review = Reviews(
                 review=review
