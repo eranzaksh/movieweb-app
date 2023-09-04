@@ -36,4 +36,5 @@ class Reviews(db_orm.Model):
 
     id = db_orm.Column(db_orm.Integer, primary_key=True, autoincrement=True)
     movie_id = db_orm.Column(db_orm.Integer, db_orm.ForeignKey('movie.id'))
+    user_id = db_orm.Column(db_orm.Integer, db_orm.ForeignKey('user.id'))
     review = db_orm.Column(db_orm.String)

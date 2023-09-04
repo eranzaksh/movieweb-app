@@ -84,8 +84,10 @@
 										{% for review in movies_with_reviews[movie] %}
 											<li><em>"{{ review.review }}"</em></li>
 											<li class="delete-update">
-												<form method="POST" action="/all_reviews/delete_review/{{ review.id }}">
-													<input type="submit" value="Delete">
+												{% if current_user.is_authenticated %}
+													<form method="POST" action="/all_reviews/delete_review/{{ review.id }}">
+														<input type="submit" value="Delete">
+												{% endif %}
 												</form>
 											</li>
 										{% endfor %}

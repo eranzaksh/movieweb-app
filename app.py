@@ -1,13 +1,13 @@
 import os
 import secrets
 from flask import Flask, render_template, request, redirect, url_for, flash
-from database_managers.json_data_manager_interface import JSONDataManager, WrongPassword, UserAlreadyExists, \
+from database_managers.json_data_manager_interface import WrongPassword, UserAlreadyExists, \
     NotFoundException
 from database_managers.add_movies_methods_json import MovieAlreadyExists
 from database_managers.user_data_manager import User
 from database_managers.sql_data_manager import SQLiteDataManager
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from api import api
+from routes.api import api
 
 app = Flask(__name__)
 app.register_blueprint(api, url_prefix='/api')
@@ -66,14 +66,14 @@ def delete_review(review_id):
 
 
 @app.route('/all_reviews', methods=["GET"])
+@login_required
 def all_reviews():
+    # add active user with edit button which only he can see (because he is authenticated)
     movies_with_reviews = {}
     movies_and_reviews = data_manager.get_reviewed_movies()
-
     for movie, review in movies_and_reviews:
         if movie not in movies_with_reviews:
             movies_with_reviews[movie] = []
-
         movies_with_reviews[movie].append({
             'id': review.id,
             'review': review.review
@@ -82,6 +82,7 @@ def all_reviews():
 
 
 @app.route('/add_review', methods=["GET", "POST"])
+@login_required
 def add_review():
     """
     Adding an anonymous review for a movie
