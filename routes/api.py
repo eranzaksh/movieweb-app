@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, current_app, jsonify
 
 api = Blueprint('api', __name__)
 
@@ -7,8 +7,8 @@ api = Blueprint('api', __name__)
 
 @api.route('/users', methods=['GET'])
 def get_users():
-    # Implementation here
-    return jsonify({'message': 'Hello, world!'})
+    print(current_app)
+    return jsonify({"HI": "YUES"})
 
 
 @api.route('/message', methods=['GET'])

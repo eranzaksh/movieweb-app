@@ -1,10 +1,8 @@
-import bcrypt
-import requests
-from sqlalchemy import func
-
-from .json_data_manager_interface import WrongPassword, UserAlreadyExists
 from .add_movies_methods_json import MovieAlreadyExists, NotFoundException
+import bcrypt
 from .data_manager_interface import DataManagerInterface
+from .json_data_manager_interface import WrongPassword, UserAlreadyExists
+import requests
 from .sql_database import User, Movie, users_and_movies, db_orm, Reviews
 from sqlalchemy.orm.exc import NoResultFound
 

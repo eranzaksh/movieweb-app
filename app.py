@@ -9,6 +9,7 @@ from database_managers.sql_data_manager import SQLiteDataManager
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from routes.api import api
 
+
 app = Flask(__name__)
 app.register_blueprint(api, url_prefix='/api')
 secret_key = secrets.token_hex(16)
