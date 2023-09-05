@@ -43,6 +43,11 @@ footer, header, hgroup, menu, nav, section {
     float: right;
 }
 
+.custom-form * {
+    font-size: 10px; /* Set your desired font size */
+}
+
+
 .update-button {
   display: inline-block;
   padding: 8px 16px;
@@ -53,6 +58,7 @@ footer, header, hgroup, menu, nav, section {
   cursor: pointer;
   font-weight: bold;
   margin-left: 10px;
+
 }
 
 .update-button:hover {

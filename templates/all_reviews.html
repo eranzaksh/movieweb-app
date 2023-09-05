@@ -42,6 +42,7 @@
 						<ul>
 							<li><a href="/">Home</a></li>
 							<li><a href="/users">All users</a></li>
+							<li><a href="/all_reviews">Reviews</a></li>
 						</ul>
 					</nav>
 
@@ -79,17 +80,18 @@
 									height: 650px">
 									</a>
 									<ul>
-										<li><p>{{ movie['name'] }}</p></li>
-										<li><h2>Reviews:</h2></li>
+										<li><em><p>{{ movie['name'] }}</p></em></li>
+										<li><strong><h2>Reviews:</h2></strong></li>
 										{% for review in movies_with_reviews[movie] %}
 											<li><em>"{{ review.review }}"</em></li>
 											{% if current_user.get_id() == review.user_id %}
-												<li class="delete-update">
-													<form method="POST" action="/all_reviews/delete_review/{{ review.id }}">
-														<input type="submit" value="Delete">
+												<li>
+													<form method="POST" action="/all_reviews/delete_review/{{ review.id }}" style="margin: 0;">
+														<input type="submit" value="Delete" style="font-size: 12px;">
+														<a href="{{ url_for('update_review', review_id=review.id) }}" class="update-button" style="font-size: 12px;">Update</a>
 													</form>
 												</li>
-												<a href="{{ url_for('update_review', review_id=review.id) }}" class="update-button">Update</a>
+
 											{% endif %}
 										{% endfor %}
 									</ul>
