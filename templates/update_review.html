@@ -42,66 +42,31 @@
 						<ul>
 							<li><a href="/">Home</a></li>
 							<li><a href="/users">All users</a></li>
+							<li><a href="/all_reviews">Reviews</a></li>
 						</ul>
 					</nav>
 
 				<!-- Main -->
 					<div id="main">
-						{% with messages = get_flashed_messages() %}
-						  {% if messages %}
-							<ul class=flashes-add-user>
-							{% for message in messages %}
-							  <strong><li>{{ message }}</li></strong>
-							{% endfor %}
-							</ul>
-						  {% endif %}
-						{% endwith %}
 						<div class="inner">
 							<header>
-								{% if current_user.is_authenticated %}
-									<a href="{{ url_for('logout') }}" class="update-button">Logout</a>
-								{% endif %}
-								<h1>Movies reviews</h1>
+								<h1>Updating movie</h1>
 							</header>
 							<section class="tiles">
-                                {% for movie in movies_with_reviews %}
-								<article class="style{{ loop.index }}">
-									{% if movie['poster'] != "N/A" %}
-									<span class="image">
-										<img src="{{ movie['poster'] }}" alt="Movie Poster">
-									</span>
-									{% else %}
-									<span class="image">
-										<img src="{{ url_for('static', filename='images/Generic_poster.jpg') }}" alt="Movie Poster">
-									</span>
-									{% endif %}
-									<a href="https://www.imdb.com/title/{{ movie['page'] }}" style="width: 400px;
-									height: 650px">
-									</a>
-									<ul>
-										<li><p>{{ movie['name'] }}</p></li>
-										<li><h2>Reviews:</h2></li>
-										{% for review in movies_with_reviews[movie] %}
-											<li><em>"{{ review.review }}"</em></li>
-											{% if current_user.get_id() == review.user_id %}
-												<li class="delete-update">
-													<form method="POST" action="/all_reviews/delete_review/{{ review.id }}">
-														<input type="submit" value="Delete">
-													</form>
-												</li>
-												<a href="{{ url_for('update_review', review_id=review.id) }}" class="update-button">Update</a>
-											{% endif %}
-										{% endfor %}
-									</ul>
+								<article class="style1">
+                                    <form method="POST" action="/all_reviews/update_review/{{ review.id }}">
+                                        <ul>
+                                            <li>
+                                                <label for="review">My Review:</label>
+                                                <textarea id="review" name="review" rows="4" cols="50">{{ review.review }}</textarea>
+                                            </li>
+                                        </ul>
+                                        <input type="submit" value="Update">
+                                    </form>
 								</article>
-                                {% endfor %}
 							</section>
-
 						</div>
-						<li class="delete-update">
-							<a href="{{ url_for('add_review') }}" class="update-button">add review</a>
-						</li>
-					</div
+					</div>
 			</div>
 
 		<!-- Scripts -->

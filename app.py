@@ -58,6 +58,15 @@ def forbidden_access(e):
     """
     return render_template('401.html', e=e), 401
 
+@app.route('/all_reviews/update_review/<int:review_id>', methods=["GET", "POST"])
+def update_review(review_id):
+    review = data_manager.fetch_review_by_id(review_id)
+    if request.method == "POST":
+        updated_review = request.form.get("review")
+        data_manager.update_review(updated_review, review_id)
+        flash("Review updated!")
+        return redirect(url_for("all_reviews"))
+    return render_template("update_review.html", review=review)
 
 @app.route('/all_reviews/delete_review/<int:review_id>', methods=["POST"])
 def delete_review(review_id):
@@ -76,7 +85,8 @@ def all_reviews():
             movies_with_reviews[movie] = []
         movies_with_reviews[movie].append({
             'id': review.id,
-            'review': review.review
+            'review': review.review,
+            'user_id': str(review.user_id)
         })
     return render_template("all_reviews.html", movies_with_reviews=movies_with_reviews)
 
@@ -87,11 +97,12 @@ def add_review():
     """
     Adding an anonymous review for a movie
     """
+    user_id = current_user.get_id()
     movies = data_manager.get_all_movies()
     if request.method == 'POST':
         movie = request.form.get("movie")
         review = request.form.get("review")
-        data_manager.add_review(movie, review)
+        data_manager.add_review(movie, review, user_id)
         return redirect(url_for("add_review", movies=movies))
     return render_template("add_review.html", movies=movies)
 

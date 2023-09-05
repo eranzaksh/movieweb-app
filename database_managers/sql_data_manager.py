@@ -21,6 +21,10 @@ class SQLiteDataManager(DataManagerInterface):
         return db_orm.session.query(User)
 
     @staticmethod
+    def fetch_review_by_id(review_id):
+        return db_orm.session.query(Reviews).filter(Reviews.id == review_id).one()
+
+    @staticmethod
     def get_reviewed_movies():
         return db_orm.session.query(Movie, Reviews).join(Reviews).all()
 
@@ -47,6 +51,11 @@ class SQLiteDataManager(DataManagerInterface):
             .filter(User.id == user_id).filter(Movie.id == movie_id).first()
         return movie_data
 
+    def update_review(self, updated_review, review_id):
+        current_review = self.fetch_review_by_id(review_id)
+        current_review.review = updated_review
+        db_orm.session.commit()
+        return
     @staticmethod
     def delete_review(review_id):
         a_movie_review = db_orm.session.query(Reviews).filter(Reviews.id == review_id).one()
@@ -55,21 +64,23 @@ class SQLiteDataManager(DataManagerInterface):
         return
 
     @staticmethod
-    def add_review(movie_id, review):
+    def add_review(movie_id, review, user_id):
         reviewed_movies = db_orm.session.query(Reviews.movie_id).all()
-        if reviewed_movies and movie_id in reviewed_movies[0]:
-            new_review = Reviews(
-                review=review
-            )
-            db_orm.session.add(new_review)
-            db_orm.session.commit()
-        else:
-            new_review = Reviews(
-                review=review,
-                movie_id=movie_id
-            )
-            db_orm.session.add(new_review)
-            db_orm.session.commit()
+        # if reviewed_movies and movie_id in reviewed_movies[0]:
+        #     new_review = Reviews(
+        #         review=review,
+        #         user_id=user_id
+        #     )
+        #     db_orm.session.add(new_review)
+        #     db_orm.session.commit()
+        # else:
+        new_review = Reviews(
+            review=review,
+            movie_id=movie_id,
+            user_id=user_id
+        )
+        db_orm.session.add(new_review)
+        db_orm.session.commit()
         return
 
     @staticmethod
