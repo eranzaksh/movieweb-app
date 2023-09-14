@@ -5,22 +5,25 @@ from database_managers.json_data_manager_interface import WrongPassword, UserAlr
     NotFoundException
 from database_managers.add_movies_methods_json import MovieAlreadyExists
 from database_managers.user_data_manager import User
-from database_managers.sql_data_manager import SQLiteDataManager
+from database_managers import data_manager
+from database_managers.sql_database import db_orm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from routes.api import api
 
-
 app = Flask(__name__)
-app.register_blueprint(api, url_prefix='/api')
-secret_key = secrets.token_hex(16)
-app.secret_key = secret_key
-login_manager = LoginManager()
-login_manager.init_app(app)
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 db_path = os.path.join(current_dir, 'storage_files', 'favorites_movies.sqlite')
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
+db_orm.init_app(app)
 
-data_manager = SQLiteDataManager(db_path, app)
+secret_key = secrets.token_hex(16)
+app.secret_key = secret_key
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+app.register_blueprint(api, url_prefix='/api')
 
 
 @app.route('/logout')
@@ -59,8 +62,13 @@ def forbidden_access(e):
     """
     return render_template('401.html', e=e), 401
 
+
 @app.route('/all_reviews/update_review/<int:review_id>', methods=["GET", "POST"])
+@login_required
 def update_review(review_id):
+    """
+    page to update a review
+    """
     review = data_manager.fetch_review_by_id(review_id)
     if request.method == "POST":
         updated_review = request.form.get("review")
@@ -69,8 +77,13 @@ def update_review(review_id):
         return redirect(url_for("all_reviews"))
     return render_template("update_review.html", review=review)
 
+
 @app.route('/all_reviews/delete_review/<int:review_id>', methods=["POST"])
+@login_required
 def delete_review(review_id):
+    """
+    deletes a review of the current_user
+    """
     data_manager.delete_review(review_id)
     return redirect(url_for("all_reviews"))
 
@@ -78,7 +91,9 @@ def delete_review(review_id):
 @app.route('/all_reviews', methods=["GET"])
 @login_required
 def all_reviews():
-    # add active user with edit button which only he can see (because he is authenticated)
+    """
+    View all reviews and can update/delete the reviews made by the current_user only.
+    """
     movies_with_reviews = {}
     movies_and_reviews = data_manager.get_reviewed_movies()
     for movie, review in movies_and_reviews:

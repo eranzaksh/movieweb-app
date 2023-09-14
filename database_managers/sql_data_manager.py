@@ -11,26 +11,41 @@ URL = f"http://www.omdbapi.com/?apikey={API_KEY}&t="
 
 
 class SQLiteDataManager(DataManagerInterface):
-    def __init__(self, db_file_name, app):
-        app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_file_name}"
-        db_orm.init_app(app)
+
+    def __init__(self, db):
+        self.db_orm = db
 
     def get_all_users(self):
+        """
+        :return: all users from the database
+        """
         return db_orm.session.query(User)
 
     @staticmethod
     def fetch_review_by_id(review_id):
+        """
+        return a review based on given review id
+        """
         return db_orm.session.query(Reviews).filter(Reviews.id == review_id).one()
 
     @staticmethod
     def get_reviewed_movies():
+        """
+        returns all movies and their reviews
+        """
         return db_orm.session.query(Movie, Reviews).join(Reviews).all()
 
     @staticmethod
     def get_all_movies():
+        """
+        :return: all movies from the database
+        """
         return db_orm.session.query(Movie)
 
     def get_user_movies(self, user_id):
+        """
+        return all movies for a user
+        """
         movies = db_orm.session.query(Movie, users_and_movies.c.user_rating, users_and_movies.c.watched) \
             .join(users_and_movies, users_and_movies.c.movie_id == Movie.id) \
             .filter(users_and_movies.c.user_id == user_id).all()
@@ -38,11 +53,17 @@ class SQLiteDataManager(DataManagerInterface):
 
     @staticmethod
     def fetch_user_by_id(user_id):
+        """
+        return a user object from the database based on the id
+        """
         user = db_orm.session.query(User).filter(User.id == user_id).first()
         return user
 
     @staticmethod
     def fetch_user_movie_by_id(user_id, movie_id):
+        """
+        return a movie, based on movie_id, for a user based on user_id
+        """
         movie_data = db_orm.session.query(Movie, users_and_movies.c.user_rating, users_and_movies.c.watched) \
             .join(User.movie) \
             .join(users_and_movies) \
@@ -50,12 +71,19 @@ class SQLiteDataManager(DataManagerInterface):
         return movie_data
 
     def update_review(self, updated_review, review_id):
+        """
+        updating a review based on the review_id
+        """
         current_review = self.fetch_review_by_id(review_id)
         current_review.review = updated_review
         db_orm.session.commit()
         return
+
     @staticmethod
     def delete_review(review_id):
+        """
+        delete a review based on review_id
+        """
         a_movie_review = db_orm.session.query(Reviews).filter(Reviews.id == review_id).one()
         db_orm.session.delete(a_movie_review)
         db_orm.session.commit()
@@ -63,15 +91,9 @@ class SQLiteDataManager(DataManagerInterface):
 
     @staticmethod
     def add_review(movie_id, review, user_id):
-        reviewed_movies = db_orm.session.query(Reviews.movie_id).all()
-        # if reviewed_movies and movie_id in reviewed_movies[0]:
-        #     new_review = Reviews(
-        #         review=review,
-        #         user_id=user_id
-        #     )
-        #     db_orm.session.add(new_review)
-        #     db_orm.session.commit()
-        # else:
+        """
+        add a new review to a movie from a user
+        """
         new_review = Reviews(
             review=review,
             movie_id=movie_id,
@@ -168,7 +190,7 @@ class SQLiteDataManager(DataManagerInterface):
     @staticmethod
     def update_movie(user_id, movie_id, watched, user_rating):
         """
-        Updating a movie, can update its director, date, and rating.
+        Updating a movie, can update the user rating or if watched.
         """
         db_orm.session.query(users_and_movies) \
             .filter(users_and_movies.c.movie_id == movie_id) \
@@ -178,6 +200,10 @@ class SQLiteDataManager(DataManagerInterface):
         return
 
     def delete_movie(self, user_id, movie_id):
+        """
+        remove the connection of a movie to a user, if that movie no longer have any user connections
+        it gets deleted from the database
+        """
         movie = self.fetch_user_movie_by_id(user_id, movie_id)
         user = self.fetch_user_by_id(user_id)
         user.movie.remove(movie[0])
