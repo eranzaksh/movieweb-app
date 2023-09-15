@@ -1,13 +1,28 @@
-from .add_movies_methods_json import MovieAlreadyExists, NotFoundException
 import bcrypt
 from .data_manager_interface import DataManagerInterface
-from .json_data_manager_interface import WrongPassword, UserAlreadyExists
 import requests
 from .sql_database import User, Movie, users_and_movies, db_orm, Reviews
 from sqlalchemy.orm.exc import NoResultFound
 
+
 API_KEY = "711e7593"
 URL = f"http://www.omdbapi.com/?apikey={API_KEY}&t="
+
+
+class WrongPassword(Exception):
+    pass
+
+
+class UserAlreadyExists(Exception):
+    pass
+
+
+class MovieAlreadyExists(Exception):
+    pass
+
+
+class NotFoundException(Exception):
+    pass
 
 
 class SQLiteDataManager(DataManagerInterface):

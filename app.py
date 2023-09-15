@@ -1,12 +1,10 @@
 import os
 import secrets
 from flask import Flask, render_template, request, redirect, url_for, flash
-from database_managers.json_data_manager_interface import WrongPassword, UserAlreadyExists, \
-    NotFoundException
-from database_managers.add_movies_methods_json import MovieAlreadyExists
 from database_managers.user_data_manager import User
 from database_managers import data_manager
 from database_managers.sql_database import db_orm
+from database_managers.sql_data_manager import WrongPassword, UserAlreadyExists, NotFoundException, MovieAlreadyExists
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from routes.api import api
 
