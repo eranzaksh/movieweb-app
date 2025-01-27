@@ -10,10 +10,13 @@ from routes.api import api
 
 app = Flask(__name__)
 
-current_dir = os.path.abspath(os.path.dirname(__file__))
-db_path = os.path.join(current_dir, 'storage_files', 'favorites_movies.sqlite')
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
+# current_dir = os.path.abspath(os.path.dirname(__file__))
+# db_path = os.path.join(current_dir, 'storage_files', 'favorites_movies.sqlite')
+# app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
+# db_orm.init_app(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:456@localhost:3306/movies-list"
 db_orm.init_app(app)
+
 
 secret_key = secrets.token_hex(16)
 app.secret_key = secret_key
@@ -248,4 +251,4 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5005)
+    app.run(host="0.0.0.0", port=5005)

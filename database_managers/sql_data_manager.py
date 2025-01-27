@@ -3,9 +3,11 @@ from .data_manager_interface import DataManagerInterface
 import requests
 from .sql_database import User, Movie, users_and_movies, db_orm, Reviews
 from sqlalchemy.orm.exc import NoResultFound
+from dotenv import load_dotenv
+import os
 
-
-API_KEY = "711e7593"
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
 URL = f"http://www.omdbapi.com/?apikey={API_KEY}&t="
 
 
