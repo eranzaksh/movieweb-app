@@ -5,7 +5,10 @@ __pycache__/
 *.txt
 # C extensions
 *.so
-
+/terraform/.terraform
+/terraform/terraform.*
+/terraform/.terraform.*
+/terraform/modules/vpc/.*
 # Distribution / packaging
 .Python
 build/
