@@ -7,16 +7,19 @@ from database_managers.sql_database import db_orm
 from database_managers.sql_data_manager import WrongPassword, UserAlreadyExists, NotFoundException, MovieAlreadyExists
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from routes.api import api
+from dotenv import load_dotenv
+
 
 app = Flask(__name__)
+load_dotenv()
+USER = os.getenv("DB_USER")
+PASSWORD = os.getenv("DB_PASSWORD")
+SERVER = os.getenv("DB_SERVER")
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{USER}:{PASSWORD}@{SERVER}:3306/movies_list'
 
-# current_dir = os.path.abspath(os.path.dirname(__file__))
-# db_path = os.path.join(current_dir, 'storage_files', 'favorites_movies.sqlite')
-# app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
-# db_orm.init_app(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:456@localhost:3306/movies-list"
 db_orm.init_app(app)
-
+# with app.app_context():
+#     db_orm.create_all()
 
 secret_key = secrets.token_hex(16)
 app.secret_key = secret_key

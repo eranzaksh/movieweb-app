@@ -91,7 +91,7 @@
 									<li>
 										<form method="POST" action="/users/{{ user_id }}/delete_movie/{{ movie[0].id }}">
 											<input type="submit" value="Delete">
-											<a href="{{ url_for('update_movie', user_id=user_id, movie_id=movie[0].id) }}" class="update-button">Update</a>
+											<a href="{{ url_for('update_movie', user_id=user_id, movie_id=movie[0].id) }}" class="update-button">Rating</a>
 										</form>
 
 									</li>
