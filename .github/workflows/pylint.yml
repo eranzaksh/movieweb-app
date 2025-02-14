@@ -21,4 +21,6 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        pylint $(git ls-files '*.py') --fail-under=5
+    - name: Build Docker image
+      run: docker build -t eranzaksh/moviesapp:latest app/.
