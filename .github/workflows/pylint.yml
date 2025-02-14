@@ -22,5 +22,17 @@ jobs:
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.py') --fail-under=5
+
+    - name: Get commit hash
+      id: vars
+      run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV    
+        
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      
     - name: Build Docker image
-      run: docker build -t eranzaksh/moviesapp:latest app/.
+      run: docker build -t "${{ secrets.DOCKER_PASSWORD }}"/moviesapp:"${{ env.COMMIT_HASH }}" app/.
+
+      
+    - name: Push Docker image to Docker Hub
+      run: docker push "${{ secrets.DOCKER_PASSWORD }}"/moviesapp:"${{ env.COMMIT_HASH }}"
