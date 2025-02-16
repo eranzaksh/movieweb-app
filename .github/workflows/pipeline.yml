@@ -63,8 +63,8 @@ jobs:
       run: |
         helm upgrade --install movies ./helm \
           --set image.tag=${{ env.COMMIT_HASH }} \
-          --set db.user=${{ env.DB_USER }} \
-          --set db.server=${{ env.DB_SERVER }} \
+          --set db.user="${{ env.DB_USER }}" \
+          --set db.server="${{ env.DB_SERVER }}" \
           --set db.password=${{ secrets.DB_PASSWORD }} \
           --set secret.api=${{ secrets.API_KEY }}
 
