@@ -46,9 +46,9 @@ jobs:
       run: |
           sudo apt-get update && sudo apt-get install -y yq
 
-    - name: Update Helm values with Git Commit Hash
-      run: |
-        yq eval -i -y '.image.tag = env(COMMIT_HASH)' ./helm/values.yaml
+    # - name: Update Helm values with Git Commit Hash
+    #   run: |
+    #     yq eval -i -y '.image.tag = env(COMMIT_HASH)' ./helm/values.yaml
     - name: Connect to AWS
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -62,6 +62,7 @@ jobs:
     - name: Deploy and upgrade app as helm package
       run: |
         helm upgrade --install movies ./helm \
+        --set image.tag=${{ env.COMMIT_HASH }} \
         --set db.user=${{ env.DB_USER }} \
         --set db.server=${{ env.DB_SERVER }} \
         --set db.password=${{ secrets.DB_PASSWORD }} \ 
