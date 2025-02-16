@@ -48,7 +48,7 @@ jobs:
 
     - name: Update Helm values with Git Commit Hash
       run: |
-          yq -i '.image.tag = strenv(COMMIT_HASH)' helm/values.yaml
+          yq -i -y '.image.tag = strenv(COMMIT_HASH)' helm/values.yaml
           
     - name: Connect to AWS
       uses: aws-actions/configure-aws-credentials@v4
