@@ -51,5 +51,5 @@ module "eks" {
 
 module "nginx_ingress" {
   source     = "./modules/ingress_controller"
-  depends_on = [module.prometheus]
+  # depends_on = [module.prometheus]
 }

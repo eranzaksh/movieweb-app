@@ -11,12 +11,6 @@ resource "helm_release" "nginx_ingress" {
     controller:
       service:
         type: LoadBalancer
-      metrics:
-        enabled: true
-        serviceMonitor:
-          enabled: true
-          additionalLabels:
-            release: "my-k8s-prom-stack"
     EOF
   ]
 }
@@ -27,4 +21,5 @@ data "kubernetes_service" "nginx_ingress_lb" {
     name      = "nginx-ingress-controller"
     namespace = "ingress-nginx"
   }
+  depends_on = [helm_release.nginx_ingress]
 }

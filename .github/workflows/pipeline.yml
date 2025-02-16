@@ -5,6 +5,9 @@ on: [push]
 env:
   EKS_CLUSTER_NAME: tf-movies 
   AWS_REGION: eu-north-1
+  DOMAINS: eranmovies
+  DUCKDNS_URL: "https://www.duckdns.org/update?domains=${{ env.DOMAINS }}&token=${{ secrets.DUCK_TOKEN }}"
+
 
 jobs:
   build:
@@ -40,6 +43,14 @@ jobs:
     - name: Push Docker image to Docker Hub
       run: docker push eranzaksh/moviesapp:"${{ env.COMMIT_HASH }}"
 
+    - name: Install yq
+      run: |
+          sudo apt-get update && sudo apt-get install -y yq
+
+    - name: Update Helm values with Git Commit Hash
+      run: |
+          yq -i '.image.tag = strenv(COMMIT_HASH)' helm/values.yaml
+          
     - name: Connect to AWS
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -47,5 +58,19 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{env.AWS_REGION}}
 
-    # - name: Update kube config
-    #   run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+    - name: Update kube config
+      run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+
+    - name: Deploy and upgrade app as helm package
+      run: |
+        helm upgrade --install movies ./helm \
+        --set db.user=${{ env.DB_USER }} \
+        --set db.server=${{ env.DB_SERVER }} \
+        --set db.password=${{ secrets.DB_PASSWORD }} \ 
+        --set secret.api=${{ secrets.API_KEY }}
+
+    - name: Update DuckDNS with Load Balancer IP
+      run: |
+        export LbDnsName=$(kubectl get svc -n ingress-nginx | awk '{print $4}' | sed -n '2p')
+        export CLB_IP=$(nslookup ${LbDnsName} | grep 'Address' | tail -n1 | awk '{print $2}')
+        curl "$DUCKDNS_URL&ip=$CLB_IP"
