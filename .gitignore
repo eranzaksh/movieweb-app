@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.txt
+!requirements.txt
+/app/docker-compose2.yaml
 # C extensions
 *.so
 /terraform/.terraform

@@ -1,0 +1,16 @@
+name: "web-app"
+image:
+  repository: eranzaksh/moviesapp
+  tag: "da37dbd"
+service:
+  type: ClusterIP
+  targetPort: 5005
+  port: 443
+spec:
+  replicaCount: 1
+db:
+  user: "admin"
+  server: "default"
+  password: "default"
+secret:
+  api: "default"
