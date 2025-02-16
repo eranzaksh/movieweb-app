@@ -1,4 +1,4 @@
-name: Pylint
+name: pipeline
 
 on: [push]
 
@@ -32,7 +32,9 @@ jobs:
       
     - name: Build Docker image
       run: docker build -t eranzaksh/moviesapp:"${{ env.COMMIT_HASH }}" app/.
-
       
     - name: Push Docker image to Docker Hub
       run: docker push eranzaksh/moviesapp:"${{ env.COMMIT_HASH }}"
+
+    - name: Connect to eks
+
