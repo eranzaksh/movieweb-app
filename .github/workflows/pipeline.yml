@@ -68,9 +68,11 @@ jobs:
           --set db.password=${{ secrets.DB_PASSWORD }} \
           --set secret.api=${{ secrets.API_KEY }}
 
-    - name: Update DuckDNS with Load Balancer IP
+    - name: Update DuckDNS with LB IP
       run: |
         export LbDnsName=$(kubectl get svc -n ingress-nginx | awk '{print $4}' | sed -n '2p')
         export CLB_IP=$(nslookup ${LbDnsName} | grep 'Address' | tail -n1 | awk '{print $2}')
-        echo "DUCKDNS_URL=https://www.duckdns.org/update?domains=${{ env.DOMAINS }}&token=${{ secrets.DUCK_TOKEN }}" >> $GITHUB_ENV
+        export DUCKDNS_URL="https://www.duckdns.org/update?domains=eranmovies&token=${{ secrets.DUCK_TOKEN }}"
+        echo "DUCKDNS_URL is: $DUCKDNS_URL&ip=$CLB_IP"
         curl "$DUCKDNS_URL&ip=$CLB_IP"
+      shell: bash
