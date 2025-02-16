@@ -42,9 +42,9 @@ jobs:
     - name: Push Docker image to Docker Hub
       run: docker push eranzaksh/moviesapp:"${{ env.COMMIT_HASH }}"
 
-    - name: Install yq
-      run: |
-          sudo apt-get update && sudo apt-get install -y yq
+    # - name: Install yq
+    #   run: |
+    #       sudo apt-get update && sudo apt-get install -y yq
 
     # - name: Update Helm values with Git Commit Hash
     #   run: |
@@ -62,11 +62,11 @@ jobs:
     - name: Deploy and upgrade app as helm package
       run: |
         helm upgrade --install movies ./helm \
-        --set image.tag=${{ env.COMMIT_HASH }} \
-        --set db.user=${{ env.DB_USER }} \
-        --set db.server=${{ env.DB_SERVER }} \
-        --set db.password=${{ secrets.DB_PASSWORD }} \ 
-        --set secret.api=${{ secrets.API_KEY }}
+          --set image.tag=${{ env.COMMIT_HASH }} \
+          --set db.user=${{ env.DB_USER }} \
+          --set db.server=${{ env.DB_SERVER }} \
+          --set db.password=${{ secrets.DB_PASSWORD }} \
+          --set secret.api=${{ secrets.API_KEY }}
 
     - name: Update DuckDNS with Load Balancer IP
       run: |
