@@ -6,7 +6,6 @@ env:
   EKS_CLUSTER_NAME: tf-movies 
   AWS_REGION: eu-north-1
   DOMAINS: eranmovies
-  DUCKDNS_URL: "https://www.duckdns.org/update?domains=${{ env.DOMAINS }}&token=${{ secrets.DUCK_TOKEN }}"
 
 
 jobs:
@@ -73,4 +72,5 @@ jobs:
       run: |
         export LbDnsName=$(kubectl get svc -n ingress-nginx | awk '{print $4}' | sed -n '2p')
         export CLB_IP=$(nslookup ${LbDnsName} | grep 'Address' | tail -n1 | awk '{print $2}')
+        echo "DUCKDNS_URL=https://www.duckdns.org/update?domains=${{ env.DOMAINS }}&token=${{ secrets.DUCK_TOKEN }}" >> $GITHUB_ENV
         curl "$DUCKDNS_URL&ip=$CLB_IP"
