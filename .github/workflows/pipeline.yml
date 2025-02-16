@@ -2,6 +2,10 @@ name: pipeline
 
 on: [push]
 
+env:
+  EKS_CLUSTER_NAME: tf-movies 
+  AWS_REGION: eu-north-1
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -36,5 +40,12 @@ jobs:
     - name: Push Docker image to Docker Hub
       run: docker push eranzaksh/moviesapp:"${{ env.COMMIT_HASH }}"
 
-    - name: Connect to eks
+    - name: Connect to AWS
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{env.AWS_REGION}}
 
+    # - name: Update kube config
+    #   run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
