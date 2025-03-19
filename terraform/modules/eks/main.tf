@@ -23,7 +23,6 @@ resource "aws_iam_role_policy_attachment" "tf-AmazonEKSClusterPolicy" {
   role       = aws_iam_role.tf-movies.name
 }
 
-// need to change name of cluster to movies
 resource "aws_eks_cluster" "tf-movies" {
   name     = "tf-movies"
   role_arn = aws_iam_role.tf-movies.arn

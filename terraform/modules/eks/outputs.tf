@@ -1,4 +1,3 @@
-// change all names to movies
 
 output "eks_endpoint" {
     value = aws_eks_cluster.tf-movies.endpoint
