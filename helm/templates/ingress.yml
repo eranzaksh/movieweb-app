@@ -2,8 +2,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: web-app-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - moviesapp.duckdns.org
+    secretName: moviesapp-tls
   rules:
   - host: moviesapp.duckdns.org
     http:
